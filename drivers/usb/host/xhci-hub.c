@@ -1672,6 +1672,7 @@ int xhci_bus_resume(struct usb_hcd *hcd)
 	max_ports = rhub->num_ports;
 	bus_state = &xhci->bus_state[hcd_index(hcd)];
 
+	if (hcd->speed >= HCD_USB3 && xhci->run_graceperiod) {
 	if (time_before(jiffies, bus_state->next_statechange))
 		msleep(5);
 
