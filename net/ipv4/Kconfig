@@ -702,7 +702,7 @@ config TCP_CONG_BBRPLUS
         
 choice
 	prompt "Default TCP congestion control"
-	default DEFAULT_BBRPLUS
+	default DEFAULT_WESTWOOD
 	help
 	  Select the TCP congestion control that will be used by default
 	  for all connections.
@@ -737,9 +737,6 @@ choice
 	config DEFAULT_BBR
 		bool "BBR" if TCP_CONG_BBR=y
 
-        config DEFAULT_BBRPLUS
-                bool "BBRPLUS" if TCP_CONG_BBRPLUS=y
-
 	config DEFAULT_RENO
 		bool "Reno"
 endchoice
@@ -758,7 +755,7 @@ config DEFAULT_TCP_CONG
 	default "htcp" if DEFAULT_HTCP
 	default "hybla" if DEFAULT_HYBLA
 	default "vegas" if DEFAULT_VEGAS
-	default "westwood" if DEFAULT_WESTWOOD
+	default "westwood+" if DEFAULT_WESTWOOD
 	default "veno" if DEFAULT_VENO
 	default "reno" if DEFAULT_RENO
 	default "dctcp" if DEFAULT_DCTCP
