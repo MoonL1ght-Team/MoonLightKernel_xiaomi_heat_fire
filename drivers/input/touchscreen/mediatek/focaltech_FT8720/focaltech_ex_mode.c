@@ -16,31 +16,31 @@
  */
 
 /*****************************************************************************
-*
-* File Name: focaltech_ex_mode.c
-*
-* Author: Focaltech Driver Team
-*
-* Created: 2016-08-31
-*
-* Abstract:
-*
-* Reference:
-*
-*****************************************************************************/
+ *
+ * File Name: focaltech_ex_mode.c
+ *
+ * Author: Focaltech Driver Team
+ *
+ * Created: 2016-08-31
+ *
+ * Abstract:
+ *
+ * Reference:
+ *
+ *****************************************************************************/
 
 /*****************************************************************************
-* 1.Included header files
-*****************************************************************************/
+ * 1.Included header files
+ *****************************************************************************/
 #include "focaltech_core.h"
 
 /*****************************************************************************
-* 2.Private constant and macro definitions using #define
-*****************************************************************************/
+ * 2.Private constant and macro definitions using #define
+ *****************************************************************************/
 
 /*****************************************************************************
-* 3.Private enumerations, structures and unions using typedef
-*****************************************************************************/
+ * 3.Private enumerations, structures and unions using typedef
+ *****************************************************************************/
 enum _ex_mode {
     MODE_GLOVE = 0,
     MODE_COVER,
@@ -49,16 +49,16 @@ enum _ex_mode {
 };
 
 /*****************************************************************************
-* 4.Static variables
-*****************************************************************************/
+ * 4.Static variables
+ *****************************************************************************/
 
 /*****************************************************************************
-* 5.Global variable or extern global variabls/functions
-*****************************************************************************/
+ * 5.Global variable or extern global variabls/functions
+ *****************************************************************************/
 
 /*****************************************************************************
-* 6.Static function prototypes
-*******************************************************************************/
+ * 6.Static function prototypes
+ *******************************************************************************/
 
 #define FTS_USB_VERTICAL 0
 #define FTS_USB_RIGHT    1
@@ -78,40 +78,40 @@ static int fts_ex_mode_switch(enum _ex_mode mode, u8 value)
         m_val = 0x00;
 
     switch (mode) {
-    case MODE_GLOVE:
-        ret = fts_write_reg(FTS_REG_GLOVE_MODE_EN, m_val);
-        if (ret < 0) {
-            FTS_ERROR("MODE_GLOVE switch to %d fail", m_val);
-        }
-        break;
-    case MODE_COVER:
-        ret = fts_write_reg(FTS_REG_COVER_MODE_EN, m_val);
-        if (ret < 0) {
-            FTS_ERROR("MODE_COVER switch to %d fail", m_val);
-        }
-        break;
-    case MODE_CHARGER:
-        ret = fts_write_reg(FTS_REG_CHARGER_MODE_EN, m_val);
-        if (ret < 0) {
-            FTS_ERROR("MODE_CHARGER switch to %d fail", m_val);
-        }
-        break;
-    case MODE_EDGE:
-        if(value == FTS_USB_RIGHT)
-            m_val = FTS_USB_RIGHT_CMD;
+        case MODE_GLOVE:
+            ret = fts_write_reg(FTS_REG_GLOVE_MODE_EN, m_val);
+            if (ret < 0) {
+                FTS_ERROR("MODE_GLOVE switch to %d fail", m_val);
+            }
+            break;
+        case MODE_COVER:
+            ret = fts_write_reg(FTS_REG_COVER_MODE_EN, m_val);
+            if (ret < 0) {
+                FTS_ERROR("MODE_COVER switch to %d fail", m_val);
+            }
+            break;
+        case MODE_CHARGER:
+            ret = fts_write_reg(FTS_REG_CHARGER_MODE_EN, m_val);
+            if (ret < 0) {
+                FTS_ERROR("MODE_CHARGER switch to %d fail", m_val);
+            }
+            break;
+        case MODE_EDGE:
+            if(value == FTS_USB_RIGHT)
+                m_val = FTS_USB_RIGHT_CMD;
         else if(value == FTS_USB_LEFT)
             m_val = FTS_USB_LEFT_CMD;
         else if(value == FTS_USB_VERTICAL)
             m_val = FTS_USB_VERTICAL_CMD;
-		ret = fts_write_reg(FTS_REG_EDGE_MODE_EN, m_val);
-		if (ret < 0) {
-			FTS_ERROR("MODE_EDGE switch to %d fail", m_val);
-		}
-		break;
-    default:
-        FTS_ERROR("mode(%d) unsupport", mode);
-        ret = -EINVAL;
+        ret = fts_write_reg(FTS_REG_EDGE_MODE_EN, m_val);
+        if (ret < 0) {
+            FTS_ERROR("MODE_EDGE switch to %d fail", m_val);
+        }
         break;
+        default:
+            FTS_ERROR("mode(%d) unsupport", mode);
+            ret = -EINVAL;
+            break;
     }
 
     return ret;
@@ -260,48 +260,48 @@ static ssize_t fts_charger_mode_store(
 }
 
 static ssize_t fts_edge_mode_show(
-	struct device *dev, struct device_attribute *attr, char *buf)
+    struct device *dev, struct device_attribute *attr, char *buf)
 {
-	int count = 0;
-	u8 val = 0;
-	struct fts_ts_data *ts_data = fts_data;
-	struct input_dev *input_dev = ts_data->input_dev;
-	mutex_lock(&input_dev->mutex);
-	fts_read_reg(FTS_REG_EDGE_MODE_EN, &val);
-	count = snprintf(buf + count, PAGE_SIZE, "Edge Mode:%s\n",
-					 ts_data->edge_mode ? "On" : "Off");
-	count += snprintf(buf + count, PAGE_SIZE, "Edge Reg(0x8C):%d\n", val);
-	mutex_unlock(&input_dev->mutex);
-	return count;
+    int count = 0;
+    u8 val = 0;
+    struct fts_ts_data *ts_data = fts_data;
+    struct input_dev *input_dev = ts_data->input_dev;
+    mutex_lock(&input_dev->mutex);
+    fts_read_reg(FTS_REG_EDGE_MODE_EN, &val);
+    count = snprintf(buf + count, PAGE_SIZE, "Edge Mode:%s\n",
+                     ts_data->edge_mode ? "On" : "Off");
+    count += snprintf(buf + count, PAGE_SIZE, "Edge Reg(0x8C):%d\n", val);
+    mutex_unlock(&input_dev->mutex);
+    return count;
 }
 static ssize_t fts_edge_mode_store(
-	struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t count)
+    struct device *dev,
+    struct device_attribute *attr, const char *buf, size_t count)
 {
-	int ret = 0;
-	struct fts_ts_data *ts_data = fts_data;
-	if (FTS_SYSFS_ECHO_ON(buf)) {
-		FTS_DEBUG("enter edge mode");
-		if (buf[0] == '1') /*USB PORTS RIGHT*/ {
-			ret = fts_ex_mode_switch(MODE_EDGE, 1);
-			if (ret >= 0) {
-				ts_data->edge_mode = ENABLE;
-			}
-		} else if (buf[0] == '2') /*USB PORTS LEFT*/ {
-			ret = fts_ex_mode_switch(MODE_EDGE, 2);
-			if (ret >= 0) {
-				ts_data->edge_mode = ENABLE;
-			}
-		}
-	} else if (FTS_SYSFS_ECHO_OFF(buf)) {
-		FTS_DEBUG("exit edge mode");
-		ret = fts_ex_mode_switch(MODE_EDGE, DISABLE);
-		if (ret >= 0) {
-			ts_data->edge_mode = DISABLE;
-		}
-	}
-	FTS_DEBUG("edge mode:%d", ts_data->edge_mode);
-	return count;
+    int ret = 0;
+    struct fts_ts_data *ts_data = fts_data;
+    if (FTS_SYSFS_ECHO_ON(buf)) {
+        FTS_DEBUG("enter edge mode");
+        if (buf[0] == '1') /*USB PORTS RIGHT*/ {
+            ret = fts_ex_mode_switch(MODE_EDGE, 1);
+            if (ret >= 0) {
+                ts_data->edge_mode = ENABLE;
+            }
+        } else if (buf[0] == '2') /*USB PORTS LEFT*/ {
+            ret = fts_ex_mode_switch(MODE_EDGE, 2);
+            if (ret >= 0) {
+                ts_data->edge_mode = ENABLE;
+            }
+        }
+    } else if (FTS_SYSFS_ECHO_OFF(buf)) {
+        FTS_DEBUG("exit edge mode");
+        ret = fts_ex_mode_switch(MODE_EDGE, DISABLE);
+        if (ret >= 0) {
+            ts_data->edge_mode = DISABLE;
+        }
+    }
+    FTS_DEBUG("edge mode:%d", ts_data->edge_mode);
+    return count;
 }
 
 /* read and write charger mode
@@ -318,7 +318,7 @@ static DEVICE_ATTR(fts_charger_mode, S_IRUGO | S_IWUSR,
                    fts_charger_mode_show, fts_charger_mode_store);
 
 static DEVICE_ATTR(fts_edge_mode, S_IRUGO | S_IWUSR,
-					fts_edge_mode_show, fts_edge_mode_store);
+                   fts_edge_mode_show, fts_edge_mode_store);
 
 static struct attribute *fts_touch_mode_attrs[] = {
     &dev_attr_fts_glove_mode.attr,

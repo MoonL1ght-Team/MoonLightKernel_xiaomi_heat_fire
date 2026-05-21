@@ -16,25 +16,25 @@
  */
 
 /*****************************************************************************
-*
-* File Name: focaltech_proximity.c
-*
-*    Author: Focaltech Driver Team
-*
-*   Created: 2016-09-19
-*
-*  Abstract: close proximity function
-*
-*   Version: v1.0
-*
-* Revision History:
-*        v1.0:
-*            First release based on xiaguobin's solution. By luougojin 2016-08-19
-*****************************************************************************/
+ *
+ * File Name: focaltech_proximity.c
+ *
+ *    Author: Focaltech Driver Team
+ *
+ *   Created: 2016-09-19
+ *
+ *  Abstract: close proximity function
+ *
+ *   Version: v1.0
+ *
+ * Revision History:
+ *        v1.0:
+ *            First release based on xiaguobin's solution. By luougojin 2016-08-19
+ *****************************************************************************/
 
 /*****************************************************************************
-* Included header files
-*****************************************************************************/
+ * Included header files
+ *****************************************************************************/
 #include "focaltech_core.h"
 #include "focaltech_common.h"
 
@@ -44,8 +44,8 @@
 #include <alsps.h>
 #include "tpd_notify.h"
 /*****************************************************************************
-* Private constant and macro definitions using #define
-*****************************************************************************/
+ * Private constant and macro definitions using #define
+ *****************************************************************************/
 /*
  * FTS_ALSPS_SUPPORT is choose structure hwmsen_object or control_path, data_path
  * FTS_ALSPS_SUPPORT = 1, is control_path, data_path
@@ -67,8 +67,8 @@
 static u8 old_proximity_value;
 
 /*****************************************************************************
-* Private enumerations, structures and unions using typedef
-*****************************************************************************/
+ * Private enumerations, structures and unions using typedef
+ *****************************************************************************/
 struct fts_proximity_st {
     u8      mode                : 1;    /* 1- proximity enable 0- disable */
     u8      detect              : 1;    /* 0-->close ; 1--> far away */
@@ -76,25 +76,25 @@ struct fts_proximity_st {
 };
 
 /*****************************************************************************
-* Static variables
-*****************************************************************************/
+ * Static variables
+ *****************************************************************************/
 struct fts_proximity_st fts_proximity_data;
 
 /*****************************************************************************
-* Global variable or extern global variabls/functions
-*****************************************************************************/
+ * Global variable or extern global variabls/functions
+ *****************************************************************************/
 
 /*****************************************************************************
-* Static function prototypes
-*****************************************************************************/
+ * Static function prototypes
+ *****************************************************************************/
 
 /************************************************************************
-* Name: fts_enter_proximity_mode
-* Brief:  change proximity mode
-* Input:  proximity mode
-* Output: no
-* Return: success =0
-***********************************************************************/
+ * Name: fts_enter_proximity_mode
+ * Brief:  change proximity mode
+ * Input:  proximity mode
+ * Output: no
+ * Return: success =0
+ ***********************************************************************/
 int fts_enter_proximity_mode(int mode)
 {
     int ret = 0;
@@ -121,12 +121,12 @@ int fts_enter_proximity_mode(int mode)
 }
 
 /*****************************************************************************
-*  Name: fts_proximity_recovery
-*  Brief: need call when reset
-*  Input:
-*  Output:
-*  Return:
-*****************************************************************************/
+ *  Name: fts_proximity_recovery
+ *  Brief: need call when reset
+ *  Input:
+ *  Output:
+ *  Return:
+ *****************************************************************************/
 int fts_proximity_recovery(struct fts_ts_data *ts_data)
 {
     int ret = 0;
@@ -190,10 +190,10 @@ int ps_local_init(void)
     ps_ctl.open_report_data = ps_open_report_data;
     ps_ctl.enable_nodata = ps_enable_nodata;
     ps_ctl.set_delay = ps_set_delay;
-#if FTS_OPEN_DATA_HAL_SUPPORT
+    #if FTS_OPEN_DATA_HAL_SUPPORT
     ps_ctl.batch = ps_batch;
     ps_ctl.flush = ps_flush;
-#endif
+    #endif
     ps_ctl.is_report_input_direct = false;
     ps_ctl.is_support_batch = false;
 
@@ -224,12 +224,12 @@ struct alsps_init_info ps_init_info = {
 #else
 
 /*****************************************************************************
-*  Name: fts_ps_operate
-*  Brief:
-*  Input:
-*  Output:
-*  Return:
-*****************************************************************************/
+ *  Name: fts_ps_operate
+ *  Brief:
+ *  Input:
+ *  Output:
+ *  Return:
+ *****************************************************************************/
 static int fts_ps_operate(void *self, uint32_t command, void *buff_in, int size_in, void *buff_out, int size_out, int *actualout)
 {
     int err = 0;
@@ -238,41 +238,41 @@ static int fts_ps_operate(void *self, uint32_t command, void *buff_in, int size_
 
     FTS_DEBUG("[PROXIMITY]COMMAND = %d", command);
     switch (command) {
-    case SENSOR_DELAY:
-        if ((buff_in == NULL) || (size_in < sizeof(int))) {
-            FTS_ERROR("[PROXIMITY]Set delay parameter error!");
-            err = -EINVAL;
-        }
-        break;
+        case SENSOR_DELAY:
+            if ((buff_in == NULL) || (size_in < sizeof(int))) {
+                FTS_ERROR("[PROXIMITY]Set delay parameter error!");
+                err = -EINVAL;
+            }
+            break;
 
-    case SENSOR_ENABLE:
-        if ((buff_in == NULL) || (size_in < sizeof(int))) {
-            FTS_ERROR("[PROXIMITY]Enable sensor parameter error!");
-            err = -EINVAL;
-        } else {
-            value = *(int *)buff_in;
-            FTS_DEBUG("[PROXIMITY]SENSOR_ENABLE value = %d", value);
-            /* Enable proximity */
-            err = fts_enter_proximity_mode(value);
-        }
-        break;
+        case SENSOR_ENABLE:
+            if ((buff_in == NULL) || (size_in < sizeof(int))) {
+                FTS_ERROR("[PROXIMITY]Enable sensor parameter error!");
+                err = -EINVAL;
+            } else {
+                value = *(int *)buff_in;
+                FTS_DEBUG("[PROXIMITY]SENSOR_ENABLE value = %d", value);
+                /* Enable proximity */
+                err = fts_enter_proximity_mode(value);
+            }
+            break;
 
-    case SENSOR_GET_DATA:
-        if ((buff_out == NULL) || (size_out < sizeof(struct hwm_sensor_data))) {
-            FTS_ERROR("[PROXIMITY]get sensor data parameter error!");
-            err = -EINVAL;
-        } else {
-            sensor_data = (struct hwm_sensor_data *)buff_out;
-            sensor_data->values[0] = (int)fts_proximity_data.detect;
-            FTS_DEBUG("sensor_data->values[0] = %d", sensor_data->values[0]);
-            sensor_data->value_divide = 1;
-            sensor_data->status = SENSOR_STATUS_ACCURACY_MEDIUM;
-        }
-        break;
-    default:
-        FTS_ERROR("[PROXIMITY]ps has no operate function:%d!", command);
-        err = -EPERM;
-        break;
+        case SENSOR_GET_DATA:
+            if ((buff_out == NULL) || (size_out < sizeof(struct hwm_sensor_data))) {
+                FTS_ERROR("[PROXIMITY]get sensor data parameter error!");
+                err = -EINVAL;
+            } else {
+                sensor_data = (struct hwm_sensor_data *)buff_out;
+                sensor_data->values[0] = (int)fts_proximity_data.detect;
+                FTS_DEBUG("sensor_data->values[0] = %d", sensor_data->values[0]);
+                sensor_data->value_divide = 1;
+                sensor_data->status = SENSOR_STATUS_ACCURACY_MEDIUM;
+            }
+            break;
+        default:
+            FTS_ERROR("[PROXIMITY]ps has no operate function:%d!", command);
+            err = -EPERM;
+            break;
     }
 
     return err;
@@ -280,12 +280,12 @@ static int fts_ps_operate(void *self, uint32_t command, void *buff_in, int size_
 #endif
 
 /*****************************************************************************
-*  Name: fts_proximity_readdata
-*  Brief:
-*  Input:
-*  Output:
-*  Return: 0 - need return in suspend
-*****************************************************************************/
+ *  Name: fts_proximity_readdata
+ *  Brief:
+ *  Input:
+ *  Output:
+ *  Return: 0 - need return in suspend
+ *****************************************************************************/
 int fts_proximity_readdata(struct fts_ts_data *ts_data)
 {
     int proximity_status = 1;
@@ -293,9 +293,9 @@ int fts_proximity_readdata(struct fts_ts_data *ts_data)
     u8 buf_addr = FTS_REG_IDE_PARA_STATUS;
     u8 buf_value = 0;
     int ps_touch_event = 1;
-#if !FTS_ALSPS_SUPPORT
+    #if !FTS_ALSPS_SUPPORT
     struct hwm_sensor_data sensor_data;
-#endif
+    #endif
     if (fts_proximity_data.mode == DISABLE)
         return -EPERM;
 
@@ -321,20 +321,20 @@ int fts_proximity_readdata(struct fts_ts_data *ts_data)
         FTS_INFO("fts_proximity_data.regvalue is 0x%x", regvalue);
         FTS_DEBUG("[PROXIMITY] p-sensor state:%s", proximity_status ? "AWAY" : "NEAR");
         old_proximity_value = regvalue;
-/*
-#if FTS_ALSPS_SUPPORT
-        ret = ps_report_interrupt_data(fts_proximity_data.detect);
-#else
-        sensor_data.values[0] = proximity_status;
-        sensor_data.value_divide = 1;
-        sensor_data.status = SENSOR_STATUS_ACCURACY_MEDIUM;
-        ret = hwmsen_get_interrupt_data(ID_PROXIMITY, &sensor_data);
-        if (ret) {
-            FTS_ERROR("[PROXIMITY] Call hwmsen_get_interrupt_data failed, ret=%d", ret);
-            return ret;
-        }
-#endif
-*/
+        /*
+         * #if FTS_ALSPS_SUPPORT
+         *        ret = ps_report_interrupt_data(fts_proximity_data.detect);
+         * #else
+         *        sensor_data.values[0] = proximity_status;
+         *        sensor_data.value_divide = 1;
+         *        sensor_data.status = SENSOR_STATUS_ACCURACY_MEDIUM;
+         *        ret = hwmsen_get_interrupt_data(ID_PROXIMITY, &sensor_data);
+         *        if (ret) {
+         *            FTS_ERROR("[PROXIMITY] Call hwmsen_get_interrupt_data failed, ret=%d", ret);
+         *            return ret;
+    }
+    #endif
+    */
         return 0;
     }
 
@@ -342,12 +342,12 @@ int fts_proximity_readdata(struct fts_ts_data *ts_data)
 }
 
 /*****************************************************************************
-*  Name: fts_proximity_suspend
-*  Brief: Run when tp enter into suspend
-*  Input:
-*  Output:
-*  Return: 0 - need return in suspend
-*****************************************************************************/
+ *  Name: fts_proximity_suspend
+ *  Brief: Run when tp enter into suspend
+ *  Input:
+ *  Output:
+ *  Return: 0 - need return in suspend
+ *****************************************************************************/
 int fts_proximity_suspend(void)
 {
     if (fts_proximity_data.mode == ENABLE)
@@ -357,12 +357,12 @@ int fts_proximity_suspend(void)
 }
 
 /*****************************************************************************
-*  Name: fts_proximity_resume
-*  Brief: Run when tp resume
-*  Input:
-*  Output:
-*  Return:
-*****************************************************************************/
+ *  Name: fts_proximity_resume
+ *  Brief: Run when tp resume
+ *  Input:
+ *  Output:
+ *  Return:
+ *****************************************************************************/
 int fts_proximity_resume(void)
 {
     if (fts_proximity_data.mode == ENABLE)
@@ -373,19 +373,19 @@ int fts_proximity_resume(void)
 
 int fts_proximity_init(void)
 {
-#if !FTS_ALSPS_SUPPORT
+    #if !FTS_ALSPS_SUPPORT
     int err = 0;
     struct hwmsen_object obj_ps;
-#endif
+    #endif
 
     FTS_FUNC_ENTER();
 
     memset((u8 *)&fts_proximity_data, 0, sizeof(struct fts_proximity_st));
     fts_proximity_data.detect = PS_FAR_AWAY;  /* defalut far awway */
 
-#if FTS_ALSPS_SUPPORT
+    #if FTS_ALSPS_SUPPORT
     alsps_driver_add(&ps_init_info);
-#else
+    #else
     obj_ps.polling = 0; /* interrupt mode */
     obj_ps.sensor_operate = fts_ps_operate;
     err = hwmsen_attach(ID_PROXIMITY, &obj_ps);
@@ -393,7 +393,7 @@ int fts_proximity_init(void)
         FTS_ERROR("[PROXIMITY]fts proximity attach fail = %d!", err);
     else
         FTS_INFO("[PROXIMITY]fts proximity attach ok = %d\n", err);
-#endif
+    #endif
 
     FTS_FUNC_EXIT();
     return 0;
@@ -404,4 +404,3 @@ int fts_proximity_exit(void)
     return 0;
 }
 #endif /* FTS_PSENSOR_EN */
-

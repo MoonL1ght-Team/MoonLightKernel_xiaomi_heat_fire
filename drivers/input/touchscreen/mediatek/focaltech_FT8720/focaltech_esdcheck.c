@@ -16,40 +16,40 @@
  */
 
 /*****************************************************************************
-*
-* File Name: focaltech_esdcheck.c
-*
-*    Author: Focaltech Driver Team
-*
-*   Created: 2016-08-03
-*
-*  Abstract: ESD check function
-*
-*   Version: v1.0
-*
-* Revision History:
-*        v1.0:
-*            First release. By luougojin 2016-08-03
-*        v1.1: By luougojin 2017-02-15
-*            1. Add LCD_ESD_PATCH to control idc_esdcheck_lcderror
-*****************************************************************************/
+ *
+ * File Name: focaltech_esdcheck.c
+ *
+ *    Author: Focaltech Driver Team
+ *
+ *   Created: 2016-08-03
+ *
+ *  Abstract: ESD check function
+ *
+ *   Version: v1.0
+ *
+ * Revision History:
+ *        v1.0:
+ *            First release. By luougojin 2016-08-03
+ *        v1.1: By luougojin 2017-02-15
+ *            1. Add LCD_ESD_PATCH to control idc_esdcheck_lcderror
+ *****************************************************************************/
 
 /*****************************************************************************
-* Included header files
-*****************************************************************************/
+ * Included header files
+ *****************************************************************************/
 #include "focaltech_core.h"
 
 /*****************************************************************************
-* Private constant and macro definitions using #define
-*****************************************************************************/
+ * Private constant and macro definitions using #define
+ *****************************************************************************/
 #define ESDCHECK_WAIT_TIME              1000    /* ms */
 #define LCD_ESD_PATCH                   0
 #define ESDCHECK_INTRCNT_MAX            2
 #define ESD_INTR_INTERVALS              200    /* unit:ms */
 
 /*****************************************************************************
-* Private enumerations, structures and unions using typedef
-*****************************************************************************/
+ * Private enumerations, structures and unions using typedef
+ *****************************************************************************/
 struct fts_esdcheck_st {
     u8      mode                : 1;    /* 1- need check esd 0- no esd check */
     u8      suspend             : 1;
@@ -65,21 +65,21 @@ struct fts_esdcheck_st {
 };
 
 /*****************************************************************************
-* Static variables
-*****************************************************************************/
+ * Static variables
+ *****************************************************************************/
 static struct fts_esdcheck_st fts_esdcheck_data;
 
 /*****************************************************************************
-* Global variable or extern global variabls/functions
-*****************************************************************************/
+ * Global variable or extern global variabls/functions
+ *****************************************************************************/
 
 /*****************************************************************************
-* Static function prototypes
-*****************************************************************************/
+ * Static function prototypes
+ *****************************************************************************/
 
 /*****************************************************************************
-* functions body
-*****************************************************************************/
+ * functions body
+ *****************************************************************************/
 #if LCD_ESD_PATCH
 int lcd_need_reset;
 static int tp_need_recovery; /* LCD reset cause Tp reset */
@@ -104,10 +104,10 @@ int idc_esdcheck_lcderror(struct fts_ts_data *ts_data)
 
     if (val == 0xAA) {
         /*
-        * 1. Set flag lcd_need_reset = 1;
-        * 2. LCD driver need reset(recovery) LCD and set lcd_need_reset to 0
-        * 3. recover TP state
-        */
+         * 1. Set flag lcd_need_reset = 1;
+         * 2. LCD driver need reset(recovery) LCD and set lcd_need_reset to 0
+         * 3. recover TP state
+         */
         FTS_INFO("LCD ESD, need execute LCD reset");
         lcd_need_reset = 1;
         tp_need_recovery = 1;
@@ -165,13 +165,13 @@ static bool get_chip_id(struct fts_ts_data *ts_data)
 }
 
 /*****************************************************************************
-*  Name: get_flow_cnt
-*  Brief: Read flow cnt(0x91)
-*  Input:
-*  Output:
-*  Return:  1(true) - Reg 0x91(flow cnt) abnormal: hold a value for 5 times
-*           0(false) - Reg 0x91(flow cnt) normal
-*****************************************************************************/
+ *  Name: get_flow_cnt
+ *  Brief: Read flow cnt(0x91)
+ *  Input:
+ *  Output:
+ *  Return:  1(true) - Reg 0x91(flow cnt) abnormal: hold a value for 5 times
+ *           0(false) - Reg 0x91(flow cnt) normal
+ *****************************************************************************/
 static bool get_flow_cnt(struct fts_ts_data *ts_data)
 {
     int     ret = 0;
@@ -267,12 +267,12 @@ static int esdcheck_algorithm(struct fts_ts_data *ts_data)
 static void esdcheck_func(struct work_struct *work)
 {
     struct fts_ts_data *ts_data = container_of(work,
-                                  struct fts_ts_data, esdcheck_work.work);
+                                               struct fts_ts_data, esdcheck_work.work);
 
     if (ts_data->esd_support && fts_esdcheck_data.mode) {
-#if LCD_ESD_PATCH
+        #if LCD_ESD_PATCH
         idc_esdcheck_lcderror(ts_data);
-#endif
+        #endif
         esdcheck_algorithm(ts_data);
         queue_delayed_work(ts_data->ts_workqueue, &ts_data->esdcheck_work,
                            msecs_to_jiffies(ESDCHECK_WAIT_TIME));
@@ -280,13 +280,13 @@ static void esdcheck_func(struct work_struct *work)
 }
 
 /*****************************************************************************
-*  Name: fts_esdcheck_proc_busy
-*  Brief: When APK or ADB command access TP via driver, then need set proc_debug,
-*         then will not check ESD.
-*  Input:
-*  Output:
-*  Return:
-*****************************************************************************/
+ *  Name: fts_esdcheck_proc_busy
+ *  Brief: When APK or ADB command access TP via driver, then need set proc_debug,
+ *         then will not check ESD.
+ *  Input:
+ *  Output:
+ *  Return:
+ *****************************************************************************/
 void fts_esdcheck_proc_busy(struct fts_ts_data *ts_data, bool proc_debug)
 {
     if (ts_data->esd_support) {
@@ -295,13 +295,13 @@ void fts_esdcheck_proc_busy(struct fts_ts_data *ts_data, bool proc_debug)
 }
 
 /*****************************************************************************
-*  Name: fts_esdcheck_switch
-*  Brief: FTS esd check function switch.
-*  Input:   enable:  1 - Enable esd check
-*                    0 - Disable esd check
-*  Output:
-*  Return:
-*****************************************************************************/
+ *  Name: fts_esdcheck_switch
+ *  Brief: FTS esd check function switch.
+ *  Input:   enable:  1 - Enable esd check
+ *                    0 - Disable esd check
+ *  Output:
+ *  Return:
+ *****************************************************************************/
 void fts_esdcheck_switch(struct fts_ts_data *ts_data, bool enable)
 {
     if (ts_data->esd_support) {
@@ -380,7 +380,7 @@ static ssize_t fts_esdcheck_show(
 
     mutex_lock(&input_dev->mutex);
     count = snprintf(buf, PAGE_SIZE, "Esd check: %s\n", \
-                     ts_data->esd_support ? "On" : "Off");
+    ts_data->esd_support ? "On" : "Off");
     mutex_unlock(&input_dev->mutex);
 
     return count;

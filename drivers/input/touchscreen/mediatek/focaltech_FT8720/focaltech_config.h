@@ -15,18 +15,18 @@
  *
  */
 /************************************************************************
-*
-* File Name: focaltech_config.h
-*
-* Author: Focaltech Driver Team
-*
-* Created: 2016-08-08
-*
-* Abstract: global configurations
-*
-* Version: v1.0
-*
-************************************************************************/
+ *
+ * File Name: focaltech_config.h
+ *
+ * Author: Focaltech Driver Team
+ *
+ * Created: 2016-08-08
+ *
+ * Abstract: global configurations
+ *
+ * Version: v1.0
+ *
+ ************************************************************************/
 #ifndef _LINUX_FOCLATECH_CONFIG_H_
 #define _LINUX_FOCLATECH_CONFIG_H_
 
@@ -202,12 +202,12 @@
 /*
  * Report Pressure in multitouch
  * 1:enable(default),0:disable
-*/
+ */
 
 /*
  * Stylus PEN enable
  * 1:enable(default),0:disable
-*/
+ */
 #define FTS_PEN_EN                              0
 
 /*

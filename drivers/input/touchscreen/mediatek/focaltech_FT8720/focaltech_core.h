@@ -15,24 +15,24 @@
  *
  */
 /*****************************************************************************
-*
-* File Name: focaltech_core.h
-
-* Author: Focaltech Driver Team
-*
-* Created: 2016-08-08
-*
-* Abstract:
-*
-* Reference:
-*
-*****************************************************************************/
+ *
+ * File Name: focaltech_core.h
+ *
+ * Author: Focaltech Driver Team
+ *
+ * Created: 2016-08-08
+ *
+ * Abstract:
+ *
+ * Reference:
+ *
+ *****************************************************************************/
 
 #ifndef __LINUX_FOCALTECH_CORE_H__
 #define __LINUX_FOCALTECH_CORE_H__
 /*****************************************************************************
-* Included header files
-*****************************************************************************/
+ * Included header files
+ *****************************************************************************/
 #include <linux/kernel.h>
 #include <linux/device.h>
 #include <linux/i2c.h>
@@ -65,8 +65,8 @@
 #include <linux/hardware_info.h>
 
 /*****************************************************************************
-* Private constant and macro definitions using #define
-*****************************************************************************/
+ * Private constant and macro definitions using #define
+ *****************************************************************************/
 #define FTS_MAX_POINTS_SUPPORT              10 /* constant value, can't be changed */
 #define FTS_MAX_KEYS                        4
 #define FTS_KEY_DIM                         10
@@ -109,8 +109,8 @@
 
 #define FTS_TP_DATA_DUMP_EN                     //create procfs /proc/tp_data_dump
 /*****************************************************************************
-*  Alternative mode (When something goes wrong, the modules may be able to solve the problem.)
-*****************************************************************************/
+ *  Alternative mode (When something goes wrong, the modules may be able to solve the problem.)
+ *****************************************************************************/
 /*
  * For commnication error in PM(deep sleep) state
  */
@@ -119,8 +119,8 @@
 
 extern char Tp_name[HARDWARE_MAX_ITEM_LONGTH];
 /*****************************************************************************
-* Private enumerations, structures and unions using typedef
-*****************************************************************************/
+ * Private enumerations, structures and unions using typedef
+ *****************************************************************************/
 struct ftxxxx_proc {
     struct proc_dir_entry *proc_entry;
     u8 opmode;
@@ -196,10 +196,10 @@ struct fts_ts_data {
     int log_level;
     int fw_is_running;      /* confirm fw is running when using spi:default 0 */
     int dummy_byte;
-#if defined(CONFIG_PM) && FTS_PATCH_COMERR_PM
+    #if defined(CONFIG_PM) && FTS_PATCH_COMERR_PM
     struct completion pm_completion;
     bool pm_suspend;
-#endif
+    #endif
     bool suspended;
     bool fw_loading;
     bool irq_disabled;
@@ -236,17 +236,17 @@ struct fts_ts_data {
     int bus_type;
     struct regulator *vdd;
     struct regulator *vcc_i2c;
-#if FTS_PINCTRL_EN
+    #if FTS_PINCTRL_EN
     struct pinctrl *pinctrl;
     struct pinctrl_state *pins_active;
     struct pinctrl_state *pins_suspend;
     struct pinctrl_state *pins_release;
-#endif
-#if defined(CONFIG_FB) || defined(CONFIG_DRM)
+    #endif
+    #if defined(CONFIG_FB) || defined(CONFIG_DRM)
     struct notifier_block fb_notif;
-#elif defined(CONFIG_HAS_EARLYSUSPEND)
+    #elif defined(CONFIG_HAS_EARLYSUSPEND)
     struct early_suspend early_suspend;
-#endif
+    #endif
 };
 
 enum _FTS_BUS_TYPE {
@@ -278,8 +278,8 @@ enum _FTS_GESTURE_BMODE {
 };
 
 /*****************************************************************************
-* Global variable or extern global variabls/functions
-*****************************************************************************/
+ * Global variable or extern global variabls/functions
+ *****************************************************************************/
 extern struct fts_ts_data *fts_data;
 
 /* communication interface */

@@ -133,15 +133,15 @@ inline s32 spi_write_mem(const u32 addr, void *val, const s32 len)
 }
 
 static inline u32 cmdq_bdg_thread_get_reg(struct cmdq_thread *thread,
-	const u32 addr)
+										  const u32 addr)
 {
-	return spi_read_reg((uintptr_t)thread->base + addr);
+	return spi_read_reg((u32)(uintptr_t)thread->base + addr);
 }
 
 static inline void cmdq_bdg_thread_set_reg(struct cmdq_thread *thread,
-	const u32 addr, const u32 val)
+										   const u32 addr, const u32 val)
 {
-	spi_write_reg((uintptr_t)thread->base + addr, val);
+	spi_write_reg((u32)(uintptr_t)thread->base + addr, val);
 }
 
 static s32 cmdq_bdg_thread_warm_reset(struct cmdq_thread *thread)
@@ -156,45 +156,45 @@ static s32 cmdq_bdg_thread_warm_reset(struct cmdq_thread *thread)
 		return 0;
 
 	cmdq_err("thread:%u warm reset failed:%#x:%#x",
-		thread->idx, CMDQ_THR_WARM_RESET, val);
+			 thread->idx, CMDQ_THR_WARM_RESET, val);
 	return -EFAULT;
 }
 
 static inline void cmdq_bdg_thread_enable(struct cmdq_thread *thread)
 {
 	struct cmdq *cmdq =
-		container_of(thread->chan->mbox, typeof(*cmdq), mbox);
+	container_of(thread->chan->mbox, typeof(*cmdq), mbox);
 
 	cmdq_bdg_thread_set_reg(thread, CMDQ_THR_ENABLE, BIT(0));
 
 	mmprofile_log_ex(cmdq->mmp.thread_enable, MMPROFILE_FLAG_PULSE,
-		(BIT(0) << 16) | thread->idx,
-		cmdq_bdg_thread_get_reg(thread, CMDQ_THR_STATUS));
+					 (BIT(0) << 16) | thread->idx,
+					 cmdq_bdg_thread_get_reg(thread, CMDQ_THR_STATUS));
 }
 
 static inline void cmdq_bdg_thread_disable(struct cmdq_thread *thread)
 {
 	struct cmdq *cmdq =
-		container_of(thread->chan->mbox, typeof(*cmdq), mbox);
+	container_of(thread->chan->mbox, typeof(*cmdq), mbox);
 
 	WARN_ON(cmdq_bdg_thread_warm_reset(thread));
 	cmdq_bdg_thread_set_reg(thread, CMDQ_THR_ENABLE, 0x0);
 
 	mmprofile_log_ex(cmdq->mmp.thread_enable, MMPROFILE_FLAG_PULSE,
-		thread->idx, cmdq_bdg_thread_get_reg(thread, CMDQ_THR_STATUS));
+					 thread->idx, cmdq_bdg_thread_get_reg(thread, CMDQ_THR_STATUS));
 }
 
 static s32 cmdq_bdg_thread_suspend(struct cmdq_thread *thread)
 {
 	struct cmdq *cmdq =
-		container_of(thread->chan->mbox, typeof(*cmdq), mbox);
+	container_of(thread->chan->mbox, typeof(*cmdq), mbox);
 	u32 val;
 
 	cmdq_bdg_thread_set_reg(thread, CMDQ_THR_SUSPEND, BIT(0));
 
 	mmprofile_log_ex(cmdq->mmp.thread_suspend, MMPROFILE_FLAG_PULSE,
-		(BIT(0) << 16) | thread->idx,
-		cmdq_bdg_thread_get_reg(thread, CMDQ_THR_STATUS));
+					 (BIT(0) << 16) | thread->idx,
+					 cmdq_bdg_thread_get_reg(thread, CMDQ_THR_STATUS));
 
 	val = cmdq_bdg_thread_get_reg(thread, CMDQ_THR_ENABLE);
 	if (!(val & BIT(0)))
@@ -206,19 +206,19 @@ static s32 cmdq_bdg_thread_suspend(struct cmdq_thread *thread)
 		return 0;
 
 	cmdq_err("thread:%u suspend failed:%#x:%#x",
-		thread->idx, CMDQ_THR_STATUS, val);
+			 thread->idx, CMDQ_THR_STATUS, val);
 	return -EFAULT;
 }
 
 static inline void cmdq_bdg_thread_resume(struct cmdq_thread *thread)
 {
 	struct cmdq *cmdq =
-		container_of(thread->chan->mbox, typeof(*cmdq), mbox);
+	container_of(thread->chan->mbox, typeof(*cmdq), mbox);
 
 	cmdq_bdg_thread_set_reg(thread, CMDQ_THR_SUSPEND, 0x0);
 
 	mmprofile_log_ex(cmdq->mmp.thread_suspend, MMPROFILE_FLAG_PULSE,
-		thread->idx, cmdq_bdg_thread_get_reg(thread, CMDQ_THR_STATUS));
+					 thread->idx, cmdq_bdg_thread_get_reg(thread, CMDQ_THR_STATUS));
 }
 
 static inline phys_addr_t cmdq_bdg_thread_get_pc(struct cmdq_thread *thread)
@@ -227,7 +227,7 @@ static inline phys_addr_t cmdq_bdg_thread_get_pc(struct cmdq_thread *thread)
 }
 
 static inline void cmdq_bdg_thread_set_pc(struct cmdq_thread *thread,
-	const phys_addr_t val)
+										  const phys_addr_t val)
 {
 	cmdq_bdg_thread_set_reg(thread, CMDQ_THR_PC, CMDQ_SET_ADDR(val));
 }
@@ -239,7 +239,7 @@ static inline phys_addr_t cmdq_bdg_thread_get_end(struct cmdq_thread *thread)
 }
 
 static inline void cmdq_bdg_thread_set_end(struct cmdq_thread *thread,
-	const phys_addr_t val)
+										   const phys_addr_t val)
 {
 	cmdq_bdg_thread_set_reg(thread, CMDQ_THR_END_ADDR, CMDQ_SET_ADDR(val));
 }
@@ -247,36 +247,36 @@ static inline void cmdq_bdg_thread_set_end(struct cmdq_thread *thread,
 static s32 cmdq_bdg_clk_enable(struct cmdq_thread *thread)
 {
 	struct cmdq *cmdq =
-		container_of(thread->chan->mbox, typeof(*cmdq), mbox);
+	container_of(thread->chan->mbox, typeof(*cmdq), mbox);
 	s32 ret = atomic_read(&cmdq->usage);
 
 	if (ret & BIT(thread->idx)) {
 		cmdq_err("cmdq:%pa thread:%u usage:%#x have enabled",
-			&cmdq->base_pa, thread->idx, ret);
+				 &cmdq->base_pa, thread->idx, ret);
 		return ret;
 	}
 
 	atomic_add_return(BIT(thread->idx), &cmdq->usage);
 	cmdq_msg("%s: cmdq:%pa thread:%u usage:%#x", __func__,
-		&cmdq->base_pa, thread->idx, atomic_read(&cmdq->usage));
+			 &cmdq->base_pa, thread->idx, atomic_read(&cmdq->usage));
 	return 0;
 }
 
 static void cmdq_bdg_clk_disable(struct cmdq_thread *thread)
 {
 	struct cmdq *cmdq =
-		container_of(thread->chan->mbox, typeof(*cmdq), mbox);
+	container_of(thread->chan->mbox, typeof(*cmdq), mbox);
 	s32 ret = atomic_read(&cmdq->usage);
 
 	if (!(ret | BIT(thread->idx))) {
 		cmdq_err("cmdq:%pa thread:%u usage:%#x have disabled",
-			&cmdq->base_pa, thread->idx, ret);
+				 &cmdq->base_pa, thread->idx, ret);
 		return;
 	}
 
 	atomic_sub_return(BIT(thread->idx), &cmdq->usage);
 	cmdq_msg("%s: cmdq:%pa thread:%u usage:%#x", __func__,
-		&cmdq->base_pa, thread->idx, atomic_read(&cmdq->usage));
+			 &cmdq->base_pa, thread->idx, atomic_read(&cmdq->usage));
 }
 
 static void cmdq_bdg_dump_sysbuf(const phys_addr_t base, const size_t size)
@@ -299,7 +299,7 @@ static void cmdq_bdg_dump_sysbuf(const phys_addr_t base, const size_t size)
 static inline phys_addr_t cmdq_bdg_task_get_end(struct cmdq_task *task)
 {
 	struct cmdq_sysbuf *buf =
-		list_last_entry(&task->sysbuf, typeof(*buf), list_entry);
+	list_last_entry(&task->sysbuf, typeof(*buf), list_entry);
 
 	return buf->base + (task->cmd_size % CMDQ_SYSBUF_SIZE);
 }
@@ -330,23 +330,23 @@ EXPORT_SYMBOL(cmdq_bdg_client_get_irq);
 static inline void cmdq_bdg_dump_gce(void)
 {
 	const u32 irq = spi_read_reg(GCE_BASE + CMDQ_THR_IRQ_FLAG);
-#if 0
+	#if 0
 	u32 dbg0[3], dbg2[6], i;
 
 	for (i = 0; i < 6; i++) {
 		if (i < 3) {
 			spi_write_reg(GCE_BASE + GCE_DBG_CTL, (i << 8) | i);
 			dbg0[i] = spi_read_reg(GCE_BASE + GCE_DBG0);
-		} else
-			spi_write_reg(GCE_BASE + GCE_DBG_CTL, (i << 8));
-		dbg2[i] = spi_read_reg(GCE_BASE + GCE_DBG2);
-	}
+} else
+	spi_write_reg(GCE_BASE + GCE_DBG_CTL, (i << 8));
+	dbg2[i] = spi_read_reg(GCE_BASE + GCE_DBG2);
+}
 
-	cmdq_msg(
-		"%s: gce:%#x irq:%#x dbg0:%#x %#x %#x dbg2:%#x %#x %#x %#x %#x %#x",
-		__func__, GCE_BASE, irq, dbg0[0], dbg0[1], dbg0[2],
-		dbg2[0], dbg2[1], dbg2[2], dbg2[3], dbg2[4], dbg2[5]);
-#endif
+cmdq_msg(
+	"%s: gce:%#x irq:%#x dbg0:%#x %#x %#x dbg2:%#x %#x %#x %#x %#x %#x",
+	__func__, GCE_BASE, irq, dbg0[0], dbg0[1], dbg0[2],
+	dbg2[0], dbg2[1], dbg2[2], dbg2[3], dbg2[4], dbg2[5]);
+	#endif
 	cmdq_msg("%s: gce:%#x irq:%#x", __func__, GCE_BASE, irq);
 }
 
@@ -356,10 +356,10 @@ static inline u32 cmdq_bdg_dump_thread(struct cmdq_thread *thread)
 	u64 inst;
 
 	spi_read_mem(
-		(uintptr_t)thread->base + CMDQ_THR_STATUS, val, sizeof(u32) * 10);
+		(u32)(uintptr_t)thread->base + CMDQ_THR_STATUS, val, sizeof(u32) * 10);
 	pc = cmdq_bdg_thread_get_pc(thread);
 	end = cmdq_bdg_thread_get_end(thread);
-	spi_read_mem((uintptr_t)thread->base + CMDQ_THR_SPR0, spr, sizeof(u32) * 4);
+	spi_read_mem((u32)(uintptr_t)thread->base + CMDQ_THR_SPR0, spr, sizeof(u32) * 4);
 	spi_read_mem(pc, &inst, CMDQ_INST_SIZE);
 
 	cmdq_msg(
@@ -374,23 +374,23 @@ static inline u32 cmdq_bdg_dump_thread(struct cmdq_thread *thread)
 #if IS_ENABLED(CONFIG_MTK_CMDQ_V3)
 void cmdq_bdg_dump_handle(struct cmdqRecStruct *rec, const char *tag)
 {
-#if IS_ENABLED(CONFIG_MTK_CMDQ_V3)
+	#if IS_ENABLED(CONFIG_MTK_CMDQ_V3)
 	struct cmdq_client *client = (struct cmdq_client *)rec->pkt->cl;
 	u32 pc, base;
 
 	cmdq_msg("%s: rec:%p pkt:%p thread:%d scenario:%d engine:%#llx",
-		__func__,
-		rec, rec->pkt, rec->thread, rec->scenario, rec->engineFlag);
+			 __func__,
+		  rec, rec->pkt, rec->thread, rec->scenario, rec->engineFlag);
 	cmdq_bdg_dump_gce();
 	pc = cmdq_bdg_dump_thread(client->chan->con_priv);
 	if (!strncmp(tag, "ERR", 3)) {
 		base = SYSBUF_BASE + CMDQ_SYSBUF_SIZE *
-			((pc - SYSBUF_BASE) / CMDQ_SYSBUF_SIZE);
+		((pc - SYSBUF_BASE) / CMDQ_SYSBUF_SIZE);
 		cmdq_bdg_dump_sysbuf(base, pc - base + CMDQ_INST_SIZE);
 	}
-#else
+	#else
 	cmdq_msg("%s: rec:%p CMDQ_V3 not support", __func__, ptr);
-#endif
+	#endif
 }
 EXPORT_SYMBOL(cmdq_bdg_dump_handle);
 #endif
@@ -425,11 +425,11 @@ static void cmdq_bdg_task_done(struct cmdq_task *task, const s32 err)
 	cmdq_bdg_task_callback(task->pkt, err);
 	list_del_init(&task->list_entry);
 	mmprofile_log_ex(task->cmdq->mmp.task_done, MMPROFILE_FLAG_PULSE,
-		((s16)err << 16) | task->thread->idx, (unsigned long)task->pkt);
+					 ((s16)err << 16) | task->thread->idx, (unsigned long)task->pkt);
 
 	if (task->pkt->reuse) {
 		cmdq_msg("%s: thread:%u pkt:%p task:%p err:%d reuse",
-			__func__, task->thread->idx, task->pkt, task, err);
+				 __func__, task->thread->idx, task->pkt, task, err);
 		return;
 	}
 
@@ -458,7 +458,7 @@ static void cmdq_bdg_thread_irq_handler(struct cmdq_thread *thread)
 	irq = cmdq_bdg_thread_get_reg(thread, CMDQ_THR_IRQ_FLAG);
 	cmdq_bdg_thread_set_reg(thread, CMDQ_THR_IRQ_FLAG, ~irq);
 	cmdq_msg("%s: thread:%u irq:%#x pc:%pa end:%pa",
-		__func__, thread->idx, irq, &pc, &end);
+			 __func__, thread->idx, irq, &pc, &end);
 
 	irq &= (CMDQ_THR_IRQ_DONE | CMDQ_THR_IRQ_ERROR);
 	if (!irq)
@@ -469,7 +469,7 @@ static void cmdq_bdg_thread_irq_handler(struct cmdq_thread *thread)
 	if (task && task->pkt->loop) {
 		cmdq_bdg_task_callback(task->pkt, irq);
 		cmdq_msg("%s: thread:%u loop:%d",
-			__func__, thread->idx, task->pkt->loop);
+				 __func__, thread->idx, task->pkt->loop);
 		return;
 	}
 
@@ -481,32 +481,32 @@ static void cmdq_bdg_thread_irq_handler(struct cmdq_thread *thread)
 		if (!curr ||
 			pc == cmdq_bdg_task_get_end(task) - CMDQ_INST_SIZE) {
 			cmdq_bdg_task_done(task, 0);
-		} else if (irq & CMDQ_THR_IRQ_ERROR) {
-			u64 inst;
+			} else if (irq & CMDQ_THR_IRQ_ERROR) {
+				u64 inst;
 
-			spi_read_mem(pc, &inst, CMDQ_INST_SIZE);
-			cmdq_err("thread:%u irq:%#x pkt:%p pc:%pa inst:%#llx",
-				thread->idx, irq, task->pkt, &pc, inst);
-			cmdq_bdg_task_done(task, -EINTR);
+				spi_read_mem(pc, &inst, CMDQ_INST_SIZE);
+				cmdq_err("thread:%u irq:%#x pkt:%p pc:%pa inst:%#llx",
+						 thread->idx, irq, task->pkt, &pc, inst);
+				cmdq_bdg_task_done(task, -EINTR);
 
-			next = list_first_entry_or_null(&thread->task_busy_list,
-				typeof(*next), list_entry);
-			if (next)
-				cmdq_bdg_thread_set_pc(thread, next->cmd_base);
+				next = list_first_entry_or_null(&thread->task_busy_list,
+												typeof(*next), list_entry);
+				if (next)
+					cmdq_bdg_thread_set_pc(thread, next->cmd_base);
+			}
+
+			if (curr)
+				break;
 		}
 
-		if (curr)
-			break;
-	}
-
-	if (!list_empty(&thread->task_busy_list)) {
-		mod_timer(&thread->timeout, jiffies +
+		if (!list_empty(&thread->task_busy_list)) {
+			mod_timer(&thread->timeout, jiffies +
 			msecs_to_jiffies(thread->timeout_ms));
-		thread->timer_mod = sched_clock();
-		cmdq_msg("%s: thread:%u timeout_ms:%u reset timer",
-			__func__, thread->idx, thread->timeout_ms);
-	} else
-		cmdq_msg("%s: thread:%u without task", __func__, thread->idx);
+			thread->timer_mod = sched_clock();
+			cmdq_msg("%s: thread:%u timeout_ms:%u reset timer",
+					 __func__, thread->idx, thread->timeout_ms);
+		} else
+			cmdq_msg("%s: thread:%u without task", __func__, thread->idx);
 }
 
 s32 cmdq_bdg_irq_handler(void)
@@ -518,11 +518,11 @@ s32 cmdq_bdg_irq_handler(void)
 
 	if (!ret)
 		cmdq_err("cmdq:%pa usage:%#x have disabled",
-			&cmdq->base_pa, ret);
+				 &cmdq->base_pa, ret);
 
-	irq = spi_read_reg(cmdq->base_pa + CMDQ_THR_IRQ_FLAG);
+		irq = spi_read_reg(cmdq->base_pa + CMDQ_THR_IRQ_FLAG);
 	cmdq_msg("%s: cmdq:%pa usage:%#x irq:%#x:%#x",
-		__func__, &cmdq->base_pa, ret, CMDQ_THR_IRQ_FLAG, irq);
+			 __func__, &cmdq->base_pa, ret, CMDQ_THR_IRQ_FLAG, irq);
 
 	if (irq == UINT_MAX)
 		return IRQ_NONE;
@@ -531,7 +531,7 @@ s32 cmdq_bdg_irq_handler(void)
 	for_each_clear_bit(bit, &irq, 32) {
 		thread = &cmdq->thread[bit];
 		cmdq_msg("%s: bit:%d thread:%u occupied:%d",
-			__func__, bit, thread->idx, thread->occupied);
+				 __func__, bit, thread->idx, thread->occupied);
 
 		if (!thread->occupied) {
 			ret = IRQ_NONE;
@@ -542,8 +542,8 @@ s32 cmdq_bdg_irq_handler(void)
 
 	spi_write_reg(cmdq->base_pa + CMDQ_THR_IRQ_FLAG, UINT_MAX);
 	cmdq_msg("%s: cmdq:%pa usage:%#x irq:%#x:%#x",
-		__func__, &cmdq->base_pa, ret, CMDQ_THR_IRQ_FLAG,
-		spi_read_reg(cmdq->base_pa + CMDQ_THR_IRQ_FLAG));
+			 __func__, &cmdq->base_pa, ret, CMDQ_THR_IRQ_FLAG,
+		  spi_read_reg(cmdq->base_pa + CMDQ_THR_IRQ_FLAG));
 
 	return ret;
 }
@@ -552,9 +552,9 @@ EXPORT_SYMBOL(cmdq_bdg_irq_handler);
 static void cmdq_bdg_thread_timeout_work(struct work_struct *work)
 {
 	struct cmdq_thread *thread =
-		container_of(work, typeof(*thread), timeout_work);
+	container_of(work, typeof(*thread), timeout_work);
 	struct cmdq *cmdq =
-		container_of(thread->chan->mbox, typeof(*cmdq), mbox);
+	container_of(thread->chan->mbox, typeof(*cmdq), mbox);
 	struct cmdq_task *task, *temp, *next;
 	s32 ret = atomic_read(&cmdq->usage);
 	u64 duration;
@@ -562,68 +562,68 @@ static void cmdq_bdg_thread_timeout_work(struct work_struct *work)
 
 	if (!(ret | BIT(thread->idx)))
 		cmdq_err("cmdq:%pa thread:%u usage:%#x have disabled",
-			&cmdq->base_pa, thread->idx, ret);
+				 &cmdq->base_pa, thread->idx, ret);
 
-	if (list_empty(&thread->task_busy_list)) {
-		cmdq_msg("%s: thread:%u without task", __func__, thread->idx);
-		cmdq_bdg_thread_disable(thread);
-		cmdq_bdg_clk_disable(thread);
-		return;
-	}
-
-	WARN_ON(cmdq_bdg_thread_suspend(thread));
-	cmdq_bdg_thread_irq_handler(thread);
-
-	pc = cmdq_bdg_thread_get_pc(thread);
-	list_for_each_entry_safe(
-		task, temp, &thread->task_busy_list, list_entry) {
-		if (cmdq_bdg_task_running(task, pc)) {
-			u64 inst;
-
-			spi_read_mem(pc, &inst, CMDQ_INST_SIZE);
-			cmdq_err("thread:%u pkt:%p pc:%pa inst:%#llx",
-				thread->idx, task->pkt, &pc, inst);
-
-			cmdq_bdg_task_error_callback(task->pkt, -ETIMEDOUT);
-			cmdq_bdg_task_done(task, -ETIMEDOUT);
-
-			next = list_first_entry_or_null(&thread->task_busy_list,
-				typeof(*next), list_entry);
-			if (next)
-				cmdq_bdg_thread_set_pc(thread, next->cmd_base);
-			break;
+		if (list_empty(&thread->task_busy_list)) {
+			cmdq_msg("%s: thread:%u without task", __func__, thread->idx);
+			cmdq_bdg_thread_disable(thread);
+			cmdq_bdg_clk_disable(thread);
+			return;
 		}
-		cmdq_bdg_task_done(task, 0);
-	}
 
-	if (list_empty(&thread->task_busy_list)) {
-		cmdq_msg("%s: thread:%u without task after irq handler",
-			__func__, thread->idx);
-		cmdq_bdg_thread_disable(thread);
-		cmdq_bdg_clk_disable(thread);
-		return;
-	}
+		WARN_ON(cmdq_bdg_thread_suspend(thread));
+		cmdq_bdg_thread_irq_handler(thread);
 
-	// cmdq_bdg_thread_timeout_excceed
-	duration = div_s64(sched_clock() - thread->timer_mod, 1000000);
-	if (duration < thread->timeout_ms)
-		mod_timer(&thread->timeout, jiffies +
-			msecs_to_jiffies(thread->timeout_ms - duration));
-	else
-		mod_timer(&thread->timeout,
-			jiffies + msecs_to_jiffies(thread->timeout_ms));
+		pc = cmdq_bdg_thread_get_pc(thread);
+		list_for_each_entry_safe(
+			task, temp, &thread->task_busy_list, list_entry) {
+			if (cmdq_bdg_task_running(task, pc)) {
+				u64 inst;
 
-	thread->timer_mod = sched_clock();
-	cmdq_msg("%s: thread:%u timeout_ms:%u duration:%llu",
-		__func__, thread->idx, thread->timeout_ms, duration);
-	cmdq_bdg_thread_resume(thread);
+				spi_read_mem(pc, &inst, CMDQ_INST_SIZE);
+				cmdq_err("thread:%u pkt:%p pc:%pa inst:%#llx",
+						 thread->idx, task->pkt, &pc, inst);
+
+				cmdq_bdg_task_error_callback(task->pkt, -ETIMEDOUT);
+				cmdq_bdg_task_done(task, -ETIMEDOUT);
+
+				next = list_first_entry_or_null(&thread->task_busy_list,
+												typeof(*next), list_entry);
+				if (next)
+					cmdq_bdg_thread_set_pc(thread, next->cmd_base);
+				break;
+			}
+			cmdq_bdg_task_done(task, 0);
+			}
+
+			if (list_empty(&thread->task_busy_list)) {
+				cmdq_msg("%s: thread:%u without task after irq handler",
+						 __func__, thread->idx);
+				cmdq_bdg_thread_disable(thread);
+				cmdq_bdg_clk_disable(thread);
+				return;
+			}
+
+			// cmdq_bdg_thread_timeout_excceed
+			duration = div_s64(sched_clock() - thread->timer_mod, 1000000);
+			if (duration < thread->timeout_ms)
+				mod_timer(&thread->timeout, jiffies +
+				msecs_to_jiffies(thread->timeout_ms - duration));
+			else
+				mod_timer(&thread->timeout,
+						  jiffies + msecs_to_jiffies(thread->timeout_ms));
+
+thread->timer_mod = sched_clock();
+			cmdq_msg("%s: thread:%u timeout_ms:%u duration:%llu",
+					 __func__, thread->idx, thread->timeout_ms, duration);
+			cmdq_bdg_thread_resume(thread);
 }
 
 static void cmdq_bdg_thread_timeout(struct timer_list *timer)
 {
 	struct cmdq_thread *thread = from_timer(thread, timer, timeout);
 	struct cmdq *cmdq =
-		container_of(thread->chan->mbox, typeof(*cmdq), mbox);
+	container_of(thread->chan->mbox, typeof(*cmdq), mbox);
 
 	if (list_empty(&thread->task_busy_list)) {
 		cmdq_msg("%s: thread:%u without task", __func__, thread->idx);
@@ -640,7 +640,7 @@ static void cmdq_bdg_thread_timeout(struct timer_list *timer)
 static void cmdq_bdg_thread_shutdown(struct cmdq_thread *thread)
 {
 	struct cmdq *cmdq =
-		container_of(thread->chan->mbox, typeof(*cmdq), mbox);
+	container_of(thread->chan->mbox, typeof(*cmdq), mbox);
 	struct cmdq_task *task, *temp;
 
 	if (list_empty(&thread->task_busy_list)) {
@@ -654,10 +654,10 @@ static void cmdq_bdg_thread_shutdown(struct cmdq_thread *thread)
 	list_for_each_entry_safe(
 		task, temp, &thread->task_busy_list, list_entry) {
 		cmdq_bdg_task_done(task, -ECONNABORTED);
-	}
+		}
 
-	cmdq_bdg_thread_disable(thread);
-	cmdq_bdg_clk_disable(thread);
+		cmdq_bdg_thread_disable(thread);
+		cmdq_bdg_clk_disable(thread);
 }
 
 void cmdq_bdg_client_shutdown(struct cmdq_client *cl)
@@ -678,53 +678,53 @@ static inline void cmdq_bdg_mbox_write_sysbuf(struct cmdq_task *task)
 	list_for_each_entry_safe(pkt_buf, pkt_temp, &pkt->buf, list_entry) {
 		if (list_is_last(&pkt_buf->list_entry, &pkt->buf))
 			remain = ceil(pkt->cmd_buf_size % CMDQ_CMD_BUFFER_SIZE,
-				CMDQ_SYSBUF_COPY_SIZE);
-		cmdq_msg("%s: pkt_buf va:%p pa:%pa remain:%d",
-			__func__, pkt_buf->va_base, &pkt_buf->pa_base, remain);
+						  CMDQ_SYSBUF_COPY_SIZE);
+			cmdq_msg("%s: pkt_buf va:%p pa:%pa remain:%d",
+					 __func__, pkt_buf->va_base, &pkt_buf->pa_base, remain);
 
-		count = 0;
+			count = 0;
 		list_for_each_entry_safe_from(
 			buf, temp, &task->sysbuf, list_entry) {
 			u64 inst = ((u64)CMDQ_OP_JUMP_PA << 32) |
-				CMDQ_SET_ADDR(temp->base);
+			CMDQ_SET_ADDR(temp->base);
 
 			cmdq_msg("%s: count:%d remain:%d buf(%d):%pa", __func__,
-				count, remain, buf->index, &buf->base);
+					 count, remain, buf->index, &buf->base);
 
 			if (list_is_last(&buf->list_entry, &task->sysbuf)) {
 				spi_write_mem(buf->base, pkt_buf->va_base +
-					CMDQ_SYSBUF_COPY_SIZE * count,
-					task->cmd_size % CMDQ_SYSBUF_SIZE);
+				CMDQ_SYSBUF_COPY_SIZE * count,
+				task->cmd_size % CMDQ_SYSBUF_SIZE);
 				break;
 			}
 
 			spi_write_mem(buf->base, pkt_buf->va_base +
-				CMDQ_SYSBUF_COPY_SIZE * count,
-				CMDQ_SYSBUF_COPY_SIZE);
+			CMDQ_SYSBUF_COPY_SIZE * count,
+			CMDQ_SYSBUF_COPY_SIZE);
 
 			if (++count == remain) { // replace jump
 				cmdq_msg("%s:jump pc:%pa:%#x inst:%#llx",
-					__func__, &buf->base,
-					CMDQ_SYSBUF_COPY_SIZE - CMDQ_INST_SIZE,
-					inst);
+						 __func__, &buf->base,
+			 CMDQ_SYSBUF_COPY_SIZE - CMDQ_INST_SIZE,
+			 inst);
 				spi_write_mem(buf->base +
-					CMDQ_SYSBUF_COPY_SIZE - CMDQ_INST_SIZE,
-					&inst, CMDQ_INST_SIZE);
+				CMDQ_SYSBUF_COPY_SIZE - CMDQ_INST_SIZE,
+				&inst, CMDQ_INST_SIZE);
 				break;
 			}
 
 			// insert jump
 			cmdq_msg("%s:jump pc:%pa:%#x inst:%#llx",
-				__func__, &buf->base,
-				CMDQ_SYSBUF_COPY_SIZE, inst);
+					 __func__, &buf->base,
+			CMDQ_SYSBUF_COPY_SIZE, inst);
 			spi_write_mem(buf->base +
-				CMDQ_SYSBUF_COPY_SIZE, &inst, CMDQ_INST_SIZE);
-		}
+			CMDQ_SYSBUF_COPY_SIZE, &inst, CMDQ_INST_SIZE);
+			}
 	}
 
 	if (pkt->loop) {
 		u64 inst = ((u64)CMDQ_OP_JUMP_PA << 32) |
-			CMDQ_SET_ADDR(task->cmd_base);
+		CMDQ_SET_ADDR(task->cmd_base);
 		phys_addr_t end = cmdq_bdg_task_get_end(task) - CMDQ_INST_SIZE;
 
 		spi_write_mem(end, &inst, CMDQ_INST_SIZE);
@@ -733,7 +733,7 @@ static inline void cmdq_bdg_mbox_write_sysbuf(struct cmdq_task *task)
 }
 
 static inline void cmdq_bdg_task_connect(struct cmdq_task *task,
-	struct cmdq_task *next)
+										 struct cmdq_task *next)
 {
 	phys_addr_t end;
 	u64 val = ((u64)CMDQ_OP_JUMP_PA << 32) | CMDQ_SET_ADDR(next->cmd_base);
@@ -745,11 +745,11 @@ static inline void cmdq_bdg_task_connect(struct cmdq_task *task,
 	spi_read_mem(end, &inst[1], CMDQ_INST_SIZE);
 
 	cmdq_msg("%s: end:%pa inst:%#llx val:%#llx inst:%#llx",
-		__func__, &end, inst[0], val, inst[1]);
+			 __func__, &end, inst[0], val, inst[1]);
 }
 
 static inline void cmdq_bdg_task_insert_thread(struct cmdq_task *task,
-	const phys_addr_t pa, struct list_head **pos)
+											   const phys_addr_t pa, struct list_head **pos)
 {
 	struct cmdq_task *prev = NULL, *curr, *next = NULL;
 
@@ -763,13 +763,13 @@ static inline void cmdq_bdg_task_insert_thread(struct cmdq_task *task,
 		if (curr->pkt->priority >= task->pkt->priority)
 			break;
 		next = curr;
-	}
-	*pos = &prev->list_entry;
+		}
+		*pos = &prev->list_entry;
 
-	cmdq_bdg_task_connect(prev, task);
+		cmdq_bdg_task_connect(prev, task);
 
-	if (next)
-		cmdq_bdg_task_connect(task, next);
+		if (next)
+			cmdq_bdg_task_connect(task, next);
 }
 
 static int cmdq_bdg_mbox_send_data(struct mbox_chan *chan, void *data)
@@ -801,20 +801,20 @@ static int cmdq_bdg_mbox_send_data(struct mbox_chan *chan, void *data)
 	if (task) {
 		if (!pkt->reuse) {
 			cmdq_msg("%s: thread:%u pkt:%p task:%p reuse done",
-				__func__, thread->idx, pkt, task);
+					 __func__, thread->idx, pkt, task);
 			cmdq_bdg_task_done(task, 0);
 			return 0;
 		}
 
 		if (task->list_entry.next != &task->list_entry) {
 			cmdq_err("thread:%u pkt:%p task:%p in list",
-				thread->idx, pkt, task);
+					 thread->idx, pkt, task);
 			cmdq_bdg_task_callback(pkt, -EEXIST);
 			return -EEXIST;
 		}
 
 		cmdq_msg("%s: thread:%u pkt:%p data:%p task:%p existed",
-			__func__, thread->idx, pkt, pkt->bdg_data, task);
+				 __func__, thread->idx, pkt, pkt->bdg_data, task);
 	} else {
 		task = kzalloc(sizeof(*task), GFP_ATOMIC);
 		if (!task) {
@@ -830,15 +830,15 @@ static int cmdq_bdg_mbox_send_data(struct mbox_chan *chan, void *data)
 
 		// allocate sysbuf
 		task->cmd_size = pkt->cmd_buf_size + CMDQ_INST_SIZE *
-			(ceil(pkt->cmd_buf_size, CMDQ_SYSBUF_COPY_SIZE) - 1);
+		(ceil(pkt->cmd_buf_size, CMDQ_SYSBUF_COPY_SIZE) - 1);
 		count = ceil(task->cmd_size, CMDQ_SYSBUF_SIZE);
 
 		remain = atomic_read(&cmdq->buf_count);
 		if (remain < count) {
 			cmdq_err(
 				"thread:%u pkt:%p cmd_buf_size:%ld cmd_size:%ld count:%d without enough sysbuf:%d",
-				thread->idx, pkt, pkt->cmd_buf_size,
-				task->cmd_size, count, remain);
+			thread->idx, pkt, pkt->cmd_buf_size,
+			task->cmd_size, count, remain);
 
 			cmdq_bdg_task_callback(pkt, -ENOMEM);
 			kfree(task);
@@ -848,8 +848,8 @@ static int cmdq_bdg_mbox_send_data(struct mbox_chan *chan, void *data)
 		remain = atomic_sub_return(count, &cmdq->buf_count);
 		cmdq_msg(
 			"%s: thread:%u pkt:%p cmd_buf_size:%ld cmd_size:%ld count:%d remain:%d",
-			__func__, thread->idx, pkt, pkt->cmd_buf_size,
-			task->cmd_size, count, remain);
+		   __func__, thread->idx, pkt, pkt->cmd_buf_size,
+		   task->cmd_size, count, remain);
 
 		list_for_each_entry_safe(buf, temp, &cmdq->sysbuf, list_entry) {
 			list_move_tail(&buf->list_entry, &task->sysbuf);
@@ -872,17 +872,17 @@ static int cmdq_bdg_mbox_send_data(struct mbox_chan *chan, void *data)
 		WARN_ON(cmdq_bdg_thread_warm_reset(thread));
 
 		spi_write_reg(cmdq->base_pa + CMDQ_THR_SLOT_CYCLES,
-			CMDQ_THR_SLOT_CYCLES_COUNT * CMDQ_THR_SLOT_CYCLES_UNIT);
+					  CMDQ_THR_SLOT_CYCLES_COUNT * CMDQ_THR_SLOT_CYCLES_UNIT);
 
 		cmdq_bdg_thread_set_reg(thread, CMDQ_THR_QOS, thread->priority);
 		cmdq_bdg_thread_set_end(thread, cmdq_bdg_task_get_end(task));
 		cmdq_bdg_thread_set_pc(thread, task->cmd_base);
 		cmdq_bdg_thread_set_reg(thread, CMDQ_THR_IRQ_FLAG_EN,
-			CMDQ_THR_IRQ_DONE | CMDQ_THR_IRQ_ERROR);
+								CMDQ_THR_IRQ_DONE | CMDQ_THR_IRQ_ERROR);
 
 		if (thread->timeout_ms != CMDQ_NO_TIMEOUT) {
 			mod_timer(&thread->timeout,
-				jiffies + msecs_to_jiffies(thread->timeout_ms));
+					  jiffies + msecs_to_jiffies(thread->timeout_ms));
 			thread->timer_mod = sched_clock();
 		}
 		list_add_tail(&task->list_entry, &thread->task_busy_list);
@@ -894,8 +894,8 @@ static int cmdq_bdg_mbox_send_data(struct mbox_chan *chan, void *data)
 		spislv_write_register_mask(
 			SYSREG_IRQ_MSK_CLR, BIT(10), BIT(10));
 		cmdq_msg("%s:single pkt:%p thread:%u pc:%pa end:%pa irq:%#x",
-			__func__, pkt, thread->idx, &pc, &end,
-			spi_read_reg(SYSREG_IRQ_CTRL2));
+				 __func__, pkt, thread->idx, &pc, &end,
+		   spi_read_reg(SYSREG_IRQ_CTRL2));
 		cmdq_bdg_thread_enable(thread);
 	} else {
 		WARN_ON(cmdq_bdg_thread_suspend(thread));
@@ -909,7 +909,7 @@ static int cmdq_bdg_mbox_send_data(struct mbox_chan *chan, void *data)
 		} else {
 			cmdq_bdg_task_insert_thread(task, pc, &pos);
 			cmdq_bdg_thread_set_pc(task->thread,
-				cmdq_bdg_thread_get_pc(task->thread));
+								   cmdq_bdg_thread_get_pc(task->thread));
 			list_add(&task->list_entry, pos);
 		}
 		last = list_last_entry(
@@ -919,11 +919,11 @@ static int cmdq_bdg_mbox_send_data(struct mbox_chan *chan, void *data)
 		pc = cmdq_bdg_thread_get_pc(thread);
 		end = cmdq_bdg_thread_get_end(thread);
 		cmdq_msg("%s:multiple pkt:%p thread:%u pc:%pa end:%pa",
-			__func__, pkt, thread->idx, &pc, &end);
+				 __func__, pkt, thread->idx, &pc, &end);
 		cmdq_bdg_thread_resume(thread);
 	}
 	mmprofile_log_ex(cmdq->mmp.task_send, MMPROFILE_FLAG_PULSE,
-		thread->idx, (unsigned long)pkt);
+					 thread->idx, (unsigned long)pkt);
 
 	spin_lock_irqsave(&thread->chan->lock, flags);
 	return 0;
@@ -951,7 +951,7 @@ static bool cmdq_bdg_mbox_last_tx_done(struct mbox_chan *chan)
 }
 
 static struct mbox_chan *cmdq_bdg_xlate(struct mbox_controller *mbox,
-	const struct of_phandle_args *sp)
+										const struct of_phandle_args *sp)
 {
 	struct cmdq_thread *thread;
 	s32 idx = sp->args[0];
@@ -972,7 +972,7 @@ void cmdq_bdg_mmprofile_task_wait(struct mbox_chan *chan, struct cmdq_pkt *pkt)
 	struct cmdq *cmdq = container_of(chan->mbox, typeof(*cmdq), mbox);
 
 	mmprofile_log_ex(cmdq->mmp.task_wait, MMPROFILE_FLAG_PULSE,
-		thread->idx, (unsigned long)pkt);
+					 thread->idx, (unsigned long)pkt);
 }
 
 static const struct mbox_chan_ops cmdq_bdg_mbox_chan_ops = {
@@ -1008,16 +1008,16 @@ static inline void cmdq_bdg_mmp_init(struct cmdq *cmdq)
 	cmdq->mmp.cmdq = mmprofile_register_event(MMP_ROOT_EVENT, "cmdq_bdg");
 
 	cmdq->mmp.thread_enable =
-		mmprofile_register_event(cmdq->mmp.cmdq, "thread_enable");
+	mmprofile_register_event(cmdq->mmp.cmdq, "thread_enable");
 	cmdq->mmp.thread_suspend =
-		mmprofile_register_event(cmdq->mmp.cmdq, "thread_suspend");
+	mmprofile_register_event(cmdq->mmp.cmdq, "thread_suspend");
 
 	cmdq->mmp.task_send =
-		mmprofile_register_event(cmdq->mmp.cmdq, "task_send");
+	mmprofile_register_event(cmdq->mmp.cmdq, "task_send");
 	cmdq->mmp.task_wait =
-		mmprofile_register_event(cmdq->mmp.cmdq, "task_wait");
+	mmprofile_register_event(cmdq->mmp.cmdq, "task_wait");
 	cmdq->mmp.task_done =
-		mmprofile_register_event(cmdq->mmp.cmdq, "task_done");
+	mmprofile_register_event(cmdq->mmp.cmdq, "task_done");
 
 	mmprofile_enable_event_recursive(cmdq->mmp.cmdq, true);
 	mmprofile_start(true);
@@ -1037,19 +1037,19 @@ static int cmdq_bdg_probe(struct platform_device *pdev)
 	cmdq->base_pa = GCE_BASE;
 
 	cmdq->mbox.chans = devm_kcalloc(&pdev->dev, CMDQ_THR_MAX_COUNT,
-		sizeof(*cmdq->mbox.chans), GFP_KERNEL);
+									sizeof(*cmdq->mbox.chans), GFP_KERNEL);
 	if (!cmdq->mbox.chans)
 		return -ENOMEM;
 
 	for (i = 0; i < ARRAY_SIZE(cmdq->thread); i++) {
 		cmdq->thread[i].base =
-			cmdq->base + CMDQ_THR_BASE + CMDQ_THR_SIZE * i;
+		cmdq->base + CMDQ_THR_BASE + CMDQ_THR_SIZE * i;
 		cmdq->thread[i].gce_pa = cmdq->base_pa;
 		INIT_LIST_HEAD(&cmdq->thread[i].task_busy_list);
 		timer_setup(&cmdq->thread[i].timeout,
-			cmdq_bdg_thread_timeout, 0);
+					cmdq_bdg_thread_timeout, 0);
 		INIT_WORK(&cmdq->thread[i].timeout_work,
-			cmdq_bdg_thread_timeout_work);
+				  cmdq_bdg_thread_timeout_work);
 		cmdq->thread[i].idx = i;
 		cmdq->mbox.chans[i].con_priv = &cmdq->thread[i];
 	}
@@ -1083,7 +1083,7 @@ static int cmdq_bdg_probe(struct platform_device *pdev)
 	platform_set_drvdata(pdev, cmdq);
 
 	cmdq_msg("%s: pdev:%p buf_count:%d",
-		__func__, pdev, atomic_read(&cmdq->buf_count));
+			 __func__, pdev, atomic_read(&cmdq->buf_count));
 
 	g_cmdq = cmdq;
 	return ret;

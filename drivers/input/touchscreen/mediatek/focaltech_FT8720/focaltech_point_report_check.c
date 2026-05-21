@@ -16,50 +16,50 @@
  */
 
 /*****************************************************************************
-*
-* File Name: focaltech_point_report_check.c
-*
-* Author: Focaltech Driver Team
-*
-* Created: 2016-11-16
-*
-* Abstract: point report check function
-*
-* Version: v1.0
-*
-* Revision History:
-*
-*****************************************************************************/
+ *
+ * File Name: focaltech_point_report_check.c
+ *
+ * Author: Focaltech Driver Team
+ *
+ * Created: 2016-11-16
+ *
+ * Abstract: point report check function
+ *
+ * Version: v1.0
+ *
+ * Revision History:
+ *
+ *****************************************************************************/
 
 /*****************************************************************************
-* Included header files
-*****************************************************************************/
+ * Included header files
+ *****************************************************************************/
 #include "focaltech_core.h"
 
 /*****************************************************************************
-* Private constant and macro definitions using #define
-*****************************************************************************/
+ * Private constant and macro definitions using #define
+ *****************************************************************************/
 #define POINT_REPORT_CHECK_WAIT_TIME                200    /* unit:ms */
 #define PRC_INTR_INTERVALS                          100    /* unit:ms */
 
 /*****************************************************************************
-* Static variables
-*****************************************************************************/
+ * Static variables
+ *****************************************************************************/
 
 /*****************************************************************************
-* functions body
-*****************************************************************************/
+ * functions body
+ *****************************************************************************/
 /*****************************************************************************
-*  Name: fts_prc_func
-*  Brief: fts point report check work func, report whole up of points
-*  Input:
-*  Output:
-*  Return:
-*****************************************************************************/
+ *  Name: fts_prc_func
+ *  Brief: fts point report check work func, report whole up of points
+ *  Input:
+ *  Output:
+ *  Return:
+ *****************************************************************************/
 static void fts_prc_func(struct work_struct *work)
 {
     struct fts_ts_data *ts_data = container_of(work,
-                                  struct fts_ts_data, prc_work.work);
+                                               struct fts_ts_data, prc_work.work);
     unsigned long cur_jiffies = jiffies;
     unsigned long intr_timeout = msecs_to_jiffies(PRC_INTR_INTERVALS);
 
@@ -84,12 +84,12 @@ static void fts_prc_func(struct work_struct *work)
 }
 
 /*****************************************************************************
-*  Name: fts_prc_queue_work
-*  Brief: fts point report check queue work, call it when interrupt comes
-*  Input:
-*  Output:
-*  Return:
-*****************************************************************************/
+ *  Name: fts_prc_queue_work
+ *  Brief: fts point report check queue work, call it when interrupt comes
+ *  Input:
+ *  Output:
+ *  Return:
+ *****************************************************************************/
 void fts_prc_queue_work(struct fts_ts_data *ts_data)
 {
     if (ts_data->prc_support && !ts_data->prc_mode && !ts_data->suspended) {
@@ -130,7 +130,7 @@ static ssize_t fts_prc_show(
 
     mutex_lock(&input_dev->mutex);
     count = snprintf(buf, PAGE_SIZE, "PRC: %s\n", \
-                     ts_data->prc_support ? "Enable" : "Disable");
+    ts_data->prc_support ? "Enable" : "Disable");
     mutex_unlock(&input_dev->mutex);
 
     return count;
@@ -139,12 +139,12 @@ static ssize_t fts_prc_show(
 static DEVICE_ATTR(fts_prc, S_IRUGO | S_IWUSR, fts_prc_show, fts_prc_store);
 
 /*****************************************************************************
-*  Name: fts_point_report_check_init
-*  Brief:
-*  Input:
-*  Output:
-*  Return: < 0: Fail to create esd check queue
-*****************************************************************************/
+ *  Name: fts_point_report_check_init
+ *  Brief:
+ *  Input:
+ *  Output:
+ *  Return: < 0: Fail to create esd check queue
+ *****************************************************************************/
 int fts_point_report_check_init(struct fts_ts_data *ts_data)
 {
     int ret = 0;
@@ -169,12 +169,12 @@ int fts_point_report_check_init(struct fts_ts_data *ts_data)
 }
 
 /*****************************************************************************
-*  Name: fts_point_report_check_exit
-*  Brief:
-*  Input:
-*  Output:
-*  Return:
-*****************************************************************************/
+ *  Name: fts_point_report_check_exit
+ *  Brief:
+ *  Input:
+ *  Output:
+ *  Return:
+ *****************************************************************************/
 int fts_point_report_check_exit(struct fts_ts_data *ts_data)
 {
     FTS_FUNC_ENTER();

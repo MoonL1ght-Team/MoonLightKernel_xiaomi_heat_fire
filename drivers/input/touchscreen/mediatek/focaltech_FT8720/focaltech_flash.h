@@ -1,26 +1,26 @@
 /************************************************************************
-* Copyright (c) 2012-2020, Focaltech Systems (R),All Rights Reserved.
-*
-* File Name: focaltech_flash.h
-*
-* Author: Focaltech Driver Team
-*
-* Created: 2016-08-07
-*
-* Abstract:
-*
-************************************************************************/
+ * Copyright (c) 2012-2020, Focaltech Systems (R),All Rights Reserved.
+ *
+ * File Name: focaltech_flash.h
+ *
+ * Author: Focaltech Driver Team
+ *
+ * Created: 2016-08-07
+ *
+ * Abstract:
+ *
+ ************************************************************************/
 #ifndef __LINUX_FOCALTECH_FLASH_H__
 #define __LINUX_FOCALTECH_FLASH_H__
 
 /*****************************************************************************
-* 1.Included header files
-*****************************************************************************/
+ * 1.Included header files
+ *****************************************************************************/
 #include "focaltech_core.h"
 
 /*****************************************************************************
-* Private constant and macro definitions using #define
-*****************************************************************************/
+ * Private constant and macro definitions using #define
+ *****************************************************************************/
 #define FTS_CMD_RESET                               0x07
 #define FTS_ROMBOOT_CMD_SET_PRAM_ADDR               0xAD
 #define FTS_ROMBOOT_CMD_SET_PRAM_ADDR_LEN           4
@@ -141,8 +141,8 @@ enum FW_TYPE {
 };
 
 /*****************************************************************************
-* Private enumerations, structures and unions using typedef
-*****************************************************************************/
+ * Private enumerations, structures and unions using typedef
+ *****************************************************************************/
 /* IC info */
 struct upgrade_func {
     u16 ctype[FTS_MAX_COMPATIBLE_TYPE];
@@ -210,11 +210,11 @@ struct fts_upgrade {
 };
 
 /*****************************************************************************
-* Global variable or extern global variabls/functions
-*****************************************************************************/
+ * Global variable or extern global variabls/functions
+ *****************************************************************************/
 
 
 /*****************************************************************************
-* Static function prototypes
-*****************************************************************************/
+ * Static function prototypes
+ *****************************************************************************/
 #endif

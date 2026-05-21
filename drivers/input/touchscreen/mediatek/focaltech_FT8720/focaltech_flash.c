@@ -16,28 +16,28 @@
  */
 
 /*****************************************************************************
-*
-* File Name: focaltech_flash.c
-*
-* Author: Focaltech Driver Team
-*
-* Created: 2017-12-06
-*
-* Abstract:
-*
-* Reference:
-*
-*****************************************************************************/
+ *
+ * File Name: focaltech_flash.c
+ *
+ * Author: Focaltech Driver Team
+ *
+ * Created: 2017-12-06
+ *
+ * Abstract:
+ *
+ * Reference:
+ *
+ *****************************************************************************/
 
 /*****************************************************************************
-* 1.Included header files
-*****************************************************************************/
+ * 1.Included header files
+ *****************************************************************************/
 #include "focaltech_core.h"
 #include "focaltech_flash.h"
 
 /*****************************************************************************
-* Private constant and macro definitions using #define
-*****************************************************************************/
+ * Private constant and macro definitions using #define
+ *****************************************************************************/
 #define FTS_FW_REQUEST_SUPPORT                      1
 /* Example: focaltech_ts_fw_tianma.bin */
 #define FTS_FW_NAME_PREX_WITH_REQUEST               "focaltech_ts_fw_"
@@ -49,8 +49,8 @@
 #define SELF_TEST_OK		2
 
 /*****************************************************************************
-* Private enumerations, structures and unions using typedef
-*****************************************************************************/
+ * Private enumerations, structures and unions using typedef
+ *****************************************************************************/
 
 #define FTS_TP_INFO "tp_info"
 #define FTS_TP_LOCKDOWN_INFO "tp_lockdown_info"
@@ -62,18 +62,18 @@ static struct proc_dir_entry *FTS_proc_tp_selftest_entry;
 static int aftersale_selftest=0;
 extern int fts_factory_test(void);
 /*****************************************************************************
-* Global variable or extern global variabls/functions
-*****************************************************************************/
+ * Global variable or extern global variabls/functions
+ *****************************************************************************/
 u8 fw_file[] = {
-#include FTS_UPGRADE_FW_FILE
+    #include FTS_UPGRADE_FW_FILE
 };
 
 u8 fw_file2[] = {
-#include FTS_UPGRADE_FW2_FILE
+    #include FTS_UPGRADE_FW2_FILE
 };
 
 u8 fw_file3[] = {
-#include FTS_UPGRADE_FW3_FILE
+    #include FTS_UPGRADE_FW3_FILE
 };
 
 int32_t fts_extra_proc_init(void);
@@ -201,7 +201,7 @@ static bool fts_check_fast_download(void)
         return true;
     }
 
-read_err:
+    read_err:
     FTS_INFO("IC not support fast-download");
     return false;
 }
@@ -285,7 +285,7 @@ static int fts_dpram_write_pe(u32 saddr, const u8 *buf, u32 len, bool wpram)
             mdelay(3);
     }
 
-write_pram_err:
+    write_pram_err:
     if (cmd) {
         vfree(cmd);
         cmd = NULL;
@@ -368,7 +368,7 @@ static int fts_dpram_write(u32 saddr, const u8 *buf, u32 len, bool wpram)
         }
     }
 
-write_pram_err:
+    write_pram_err:
     if (cmd) {
         vfree(cmd);
         cmd = NULL;
@@ -536,9 +536,9 @@ static int fts_pram_write_ecc(const u8 *buf, u32 len)
 
     /* get pram app length */
     code_len = ((u16)buf[FTS_APP_INFO_OFFSET + 0] << 8)
-               + buf[FTS_APP_INFO_OFFSET + 1];
+    + buf[FTS_APP_INFO_OFFSET + 1];
     code_len_n = ((u16)buf[FTS_APP_INFO_OFFSET + 2] << 8)
-                 + buf[FTS_APP_INFO_OFFSET + 3];
+    + buf[FTS_APP_INFO_OFFSET + 3];
     if ((code_len + code_len_n) != 0xFFFF) {
         FTS_ERROR("pram code len(%x %x) fail", code_len, code_len_n);
         return -EINVAL;
@@ -587,9 +587,9 @@ static int fts_dram_write_ecc(const u8 *buf, u32 len)
 
     /* get dram data length */
     const_len = ((u16)buf[FTS_APP_INFO_OFFSET + 0x8] << 8)
-                + buf[FTS_APP_INFO_OFFSET + 0x9];
+    + buf[FTS_APP_INFO_OFFSET + 0x9];
     const_len_n = ((u16)buf[FTS_APP_INFO_OFFSET + 0x0A] << 8)
-                  + buf[FTS_APP_INFO_OFFSET + 0x0B];
+    + buf[FTS_APP_INFO_OFFSET + 0x0B];
     if (((const_len + const_len_n) != 0xFFFF) || (const_len == 0)) {
         FTS_INFO("no support dram,const len(%x %x)", const_len, const_len_n);
         return 0;
@@ -597,7 +597,7 @@ static int fts_dram_write_ecc(const u8 *buf, u32 len)
 
     dram_size = ((u32)const_len) * upg->setting_nf->length_coefficient;
     pram_app_size = ((u32)(((u16)buf[FTS_APP_INFO_OFFSET + 0] << 8)
-                           + buf[FTS_APP_INFO_OFFSET + 1]));
+    + buf[FTS_APP_INFO_OFFSET + 1]));
     pram_app_size = pram_app_size * upg->setting_nf->length_coefficient;
 
     dram_buf = buf + pram_app_size;
@@ -735,7 +735,7 @@ static int fts_fw_download(const u8 *buf, u32 len, bool need_reset)
 
     fts_esdcheck_switch(upg->ts_data, ENABLE);
     ret = 0;
-err_fw_download:
+    err_fw_download:
     fts_irq_enable();
     upg->ts_data->fw_loading = 0;
 
@@ -765,12 +765,12 @@ static int fts_read_file_default(char *file_name, u8 **file_buf)
         return -ENOENT;
     }
 
-#if 1
+    #if 1
     inode = filp->f_inode;
-#else
+    #else
     /* reserved for linux earlier verion */
     inode = filp->f_dentry->d_inode;
-#endif
+    #endif
 
     file_len = inode->i_size;
     *file_buf = (u8 *)vmalloc(file_len);
@@ -799,9 +799,9 @@ static int fts_read_file_request_firmware(char *file_name, u8 **file_buf)
     char fwname[FILE_NAME_LENGTH] = { 0 };
     struct fts_upgrade *upg = fwupgrade;
 
-#if !FTS_FW_REQUEST_SUPPORT
+    #if !FTS_FW_REQUEST_SUPPORT
     return -EINVAL;
-#endif
+    #endif
 
     snprintf(fwname, FILE_NAME_LENGTH, "%s", file_name);
     ret = request_firmware(&fw, fwname, upg->ts_data->dev);
@@ -878,7 +878,7 @@ int fts_upgrade_bin(char *fw_name, bool force)
 
     FTS_INFO("upgrade fw bin success");
 
-err_bin:
+    err_bin:
     if (fw_file_buf) {
         vfree(fw_file_buf);
         fw_file_buf = NULL;
@@ -962,7 +962,7 @@ static int fts_fw_resume(bool need_reset, enum FW_TYPE fw_type)
 
     if (FTS_FW_REQUEST_SUPPORT) {
         snprintf(fwname, FILE_NAME_LENGTH, "%s%s.bin", \
-                 FTS_FW_NAME_PREX_WITH_REQUEST, upg->module_info->vendor_name);
+        FTS_FW_NAME_PREX_WITH_REQUEST, upg->module_info->vendor_name);
         ret = request_firmware(&fw, fwname, upg->ts_data->dev);
         if (ret == 0) {
             FTS_INFO("firmware(%s) request successfully", fwname);
@@ -991,26 +991,26 @@ static int fts_fw_resume(bool need_reset, enum FW_TYPE fw_type)
         }
 
         app_off = upg->setting_nf->app2_offset * 2;
-    }
-
-
-    ret = fts_fw_download(fw_buf + app_off, fwlen - app_off, need_reset);
-    if (ret < 0) {
-        FTS_ERROR("fw resume download failed");
-    }
-
-    ret = fts_read_reg(FTS_REG_FACTORY_MODE_DETACH_FLAG, &detach_flag);
-    FTS_INFO("read reg0xB4:0x%02x[AA-normal/66-gesture]", detach_flag);
-
-_release_firmware:
-    if (FTS_FW_REQUEST_SUPPORT) {
-        if (fw != NULL) {
-            release_firmware(fw);
-            fw = NULL;
         }
-    }
 
-    return ret;
+
+        ret = fts_fw_download(fw_buf + app_off, fwlen - app_off, need_reset);
+        if (ret < 0) {
+            FTS_ERROR("fw resume download failed");
+        }
+
+        ret = fts_read_reg(FTS_REG_FACTORY_MODE_DETACH_FLAG, &detach_flag);
+        FTS_INFO("read reg0xB4:0x%02x[AA-normal/66-gesture]", detach_flag);
+
+        _release_firmware:
+        if (FTS_FW_REQUEST_SUPPORT) {
+            if (fw != NULL) {
+                release_firmware(fw);
+                fw = NULL;
+            }
+        }
+
+        return ret;
 }
 
 int fts_fw_recovery(void)
@@ -1123,8 +1123,8 @@ static int fts_get_fw_file_via_request_firmware(struct fts_upgrade *upg)
     char fwname[FILE_NAME_LENGTH] = { 0 };
 
     snprintf(fwname, FILE_NAME_LENGTH, "%s%s.bin", \
-             FTS_FW_NAME_PREX_WITH_REQUEST, \
-             upg->module_info->vendor_name);
+    FTS_FW_NAME_PREX_WITH_REQUEST, \
+    upg->module_info->vendor_name);
     FTS_INFO("firmware(%s)", fwname);
     ret = request_firmware(&fw, fwname, upg->ts_data->dev);
     if (0 == ret) {
@@ -1222,12 +1222,12 @@ static void fts_fwupg_work(struct work_struct *work)
     int ret = 0;
     u8 chip_id = 0;
     struct fts_upgrade *upg = fwupgrade;
-/*
-#if !FTS_AUTO_UPGRADE_EN
-    FTS_INFO("FTS_AUTO_UPGRADE_EN is disabled, not upgrade when power on");
-    return ;
-#endif
-*/
+    /*
+     # *if !FTS_AUTO_UPGRADE_EN
+     FTS_INFO("FTS_AUTO_UPGRADE_EN is disabled, not upgrade when power on");
+     return ;
+     #endif
+     */
     FTS_INFO("fw upgrade work function");
     if (!upg || !upg->ts_data) {
         FTS_ERROR("upg/ts_data is null");
@@ -1245,7 +1245,7 @@ static void fts_fwupg_work(struct work_struct *work)
         FTS_INFO("fw is loading, not download again");
         return ;
     }
-    
+
     ret = fts_fw_download(upg->fw, upg->fw_length, true);
     if (ret < 0) {
         FTS_ERROR("fw auto download failed");
@@ -1254,8 +1254,8 @@ static void fts_fwupg_work(struct work_struct *work)
         ret = fts_read_reg(FTS_REG_CHIP_ID, &chip_id);
         FTS_INFO("read chip id:0x%02x", chip_id);
         ret = fts_read_reg(FTS_REG_FW_VER, &fw_version);
-	FTS_INFO("read FW version:0x%02x", fw_version);
-	sprintf(tp_version_info, "[Vendor]Huaxing [TP-IC]:FT8720, [FW]0x%x\n", fw_version);
+        FTS_INFO("read FW version:0x%02x", fw_version);
+        sprintf(tp_version_info, "[Vendor]Huaxing [TP-IC]:FT8720, [FW]0x%x\n", fw_version);
     }
 }
 int fts_fwupg_init(struct fts_ts_data *ts_data)
@@ -1263,7 +1263,7 @@ int fts_fwupg_init(struct fts_ts_data *ts_data)
     int i = 0;
     struct upgrade_setting_nf *setting = &upgrade_setting_list[0];
     int setting_count =
-        sizeof(upgrade_setting_list) / sizeof(upgrade_setting_list[0]);
+    sizeof(upgrade_setting_list) / sizeof(upgrade_setting_list[0]);
 
     FTS_INFO("fw upgrade init function");
     if (!ts_data || !ts_data->ts_workqueue) {
@@ -1292,7 +1292,7 @@ int fts_fwupg_init(struct fts_ts_data *ts_data)
                 FTS_INFO("match upgrade setting,type(ID):0x%02x%02x",
                          setting->rom_idh, setting->rom_idl);
                 fwupgrade->setting_nf = setting;
-            }
+                }
         }
     }
 
@@ -1331,122 +1331,122 @@ int fts_fwupg_exit(struct fts_ts_data *ts_data)
 }
 static int32_t fts_tp_info_show(struct seq_file *m, void *v)
 {
-	seq_printf(m, "[Vendor]Huaxing, [TP-IC]: FT8720,[FW]0x%x\n", fw_version);
-	return 0;
+    seq_printf(m, "[Vendor]Huaxing, [TP-IC]: FT8720,[FW]0x%x\n", fw_version);
+    return 0;
 }
 
 static int32_t fts_tp_info_open(struct inode *inode, struct file *file)
 {
-	return single_open(file, fts_tp_info_show, NULL);
+    return single_open(file, fts_tp_info_show, NULL);
 }
 
 static const struct file_operations fts_tp_info_fops = {
-	.owner = THIS_MODULE,
-	.open = fts_tp_info_open,
-	.read = seq_read,
-	.llseek = seq_lseek,
-	.release = seq_release,
+    .owner = THIS_MODULE,
+    .open = fts_tp_info_open,
+    .read = seq_read,
+    .llseek = seq_lseek,
+    .release = seq_release,
 };
 
 static int32_t fts_tp_lockdown_info_show(struct seq_file *m, void *v)
 {
-	seq_printf(m, "0x53,0x42,0x32,0x01,0x4D,0x13,0x32,0x00\n");
-	return 0;
+    seq_printf(m, "0x53,0x42,0x32,0x01,0x4D,0x13,0x32,0x00\n");
+    return 0;
 }
 
 static int32_t fts_tp_lockdown_info_open(struct inode *inode, struct file *file)
 {
-	return single_open(file, fts_tp_lockdown_info_show, NULL);
+    return single_open(file, fts_tp_lockdown_info_show, NULL);
 }
 
 static const struct file_operations fts_tp_lockdown_info_fops = {
-	.owner = THIS_MODULE,
-	.open = fts_tp_lockdown_info_open,
-	.read = seq_read,
-	.llseek = seq_lseek,
-	.release = seq_release,
+    .owner = THIS_MODULE,
+    .open = fts_tp_lockdown_info_open,
+    .read = seq_read,
+    .llseek = seq_lseek,
+    .release = seq_release,
 };
 
 static ssize_t fts_aftersale_selftest_write(struct file *file, const char __user *buf,
-				size_t count, loff_t *ppos)
+                                            size_t count, loff_t *ppos)
 {
-	char temp_buf[20] = {0};
-	if (copy_from_user(temp_buf, buf, count)) {
-		return count;
-	}
-	if(!strncmp("short", temp_buf, 5) || !strncmp("open", temp_buf, 4)){
-		aftersale_selftest = 1;
-	} else if (!strncmp("spi", temp_buf, 3)) {
-		aftersale_selftest = 2;
-	}else {
-		aftersale_selftest = 0;
-		FTS_INFO("tp_selftest echo incorrect\n");
-	}
-	return count;
+    char temp_buf[20] = {0};
+    if (copy_from_user(temp_buf, buf, count)) {
+        return count;
+    }
+    if(!strncmp("short", temp_buf, 5) || !strncmp("open", temp_buf, 4)){
+        aftersale_selftest = 1;
+    } else if (!strncmp("spi", temp_buf, 3)) {
+        aftersale_selftest = 2;
+    }else {
+        aftersale_selftest = 0;
+        FTS_INFO("tp_selftest echo incorrect\n");
+    }
+    return count;
 }
 static ssize_t fts_aftersale_selftest_read(struct file *file, char __user *buf,
-			size_t count, loff_t *pos)
+                                           size_t count, loff_t *pos)
 {
-	int retval = 0;
-	char temp_buf[256] = {0};
-	if (aftersale_selftest == 1) {
-		if (fts_factory_test() < 0) {
-			retval = SELF_TEST_NG;
-		} else {
-			retval = SELF_TEST_OK;
-		}
-	} else if (aftersale_selftest == 2) {
+    int retval = 0;
+    char temp_buf[256] = {0};
+    if (aftersale_selftest == 1) {
+        if (fts_factory_test() < 0) {
+            retval = SELF_TEST_NG;
+        } else {
+            retval = SELF_TEST_OK;
+        }
+    } else if (aftersale_selftest == 2) {
         u8 fwver = 0;
         retval = fts_read_reg(FTS_REG_FW_VER, &fwver);
         FTS_INFO("RETVAL is %d", retval);
-		if (!retval)
-			retval = SELF_TEST_OK;
-		else
-			retval = SELF_TEST_NG;
-	}
-	snprintf(temp_buf, 256, "%d\n", retval);
-	return simple_read_from_buffer(buf, count, pos, temp_buf, strlen(temp_buf));
+        if (!retval)
+            retval = SELF_TEST_OK;
+        else
+            retval = SELF_TEST_NG;
+    }
+    snprintf(temp_buf, 256, "%d\n", retval);
+    return simple_read_from_buffer(buf, count, pos, temp_buf, strlen(temp_buf));
 }
 
 static const struct file_operations fts_aftersale_test_ops = {
-	.read = fts_aftersale_selftest_read,
-	.write = fts_aftersale_selftest_write,
-	.open  = simple_open,
-	.owner = THIS_MODULE,
+    .read = fts_aftersale_selftest_read,
+    .write = fts_aftersale_selftest_write,
+    .open  = simple_open,
+    .owner = THIS_MODULE,
 };
 int32_t fts_extra_proc_init(void)
 {
-	FTS_proc_tp_info_entry = proc_create(FTS_TP_INFO, 0444, NULL, &fts_tp_info_fops);
-	if (FTS_proc_tp_info_entry == NULL) {
-		FTS_ERROR("create proc/%s Failed!\n", FTS_TP_INFO);
-		return -ENOMEM;
-	} else {
-		FTS_INFO("create proc/%s Succeeded!\n", FTS_TP_INFO);
-	}
+    FTS_proc_tp_info_entry = proc_create(FTS_TP_INFO, 0444, NULL, &fts_tp_info_fops);
+    if (FTS_proc_tp_info_entry == NULL) {
+        FTS_ERROR("create proc/%s Failed!\n", FTS_TP_INFO);
+        return -ENOMEM;
+    } else {
+        FTS_INFO("create proc/%s Succeeded!\n", FTS_TP_INFO);
+    }
 
-	FTS_proc_tp_lockdown_info_entry = proc_create(FTS_TP_LOCKDOWN_INFO, 0444, NULL, &fts_tp_lockdown_info_fops);
-	if (FTS_proc_tp_lockdown_info_entry == NULL) {
-		FTS_ERROR("create proc/%s Failed!\n", FTS_TP_LOCKDOWN_INFO);
-		return -ENOMEM;
-	} else {
-		FTS_INFO("create proc/%s Succeeded!\n", FTS_TP_LOCKDOWN_INFO);
-	}
+    FTS_proc_tp_lockdown_info_entry = proc_create(FTS_TP_LOCKDOWN_INFO, 0444, NULL, &fts_tp_lockdown_info_fops);
+    if (FTS_proc_tp_lockdown_info_entry == NULL) {
+        FTS_ERROR("create proc/%s Failed!\n", FTS_TP_LOCKDOWN_INFO);
+        return -ENOMEM;
+    } else {
+        FTS_INFO("create proc/%s Succeeded!\n", FTS_TP_LOCKDOWN_INFO);
+    }
 
-	FTS_proc_tp_selftest_entry = proc_create(FTS_TP_SELFTEST, 0777, NULL, &fts_aftersale_test_ops);
-	if (FTS_proc_tp_selftest_entry == NULL) {
+    FTS_proc_tp_selftest_entry = proc_create(FTS_TP_SELFTEST, 0777, NULL, &fts_aftersale_test_ops);
+    if (FTS_proc_tp_selftest_entry == NULL) {
         FTS_ERROR("create proc/%s Failed!\n", FTS_TP_SELFTEST);
-		return -ENOMEM;
-	} else {
-		FTS_INFO("create proc/%s Succeeded!\n", FTS_TP_SELFTEST);
-	}
-	return 0;
+        return -ENOMEM;
+    } else {
+        FTS_INFO("create proc/%s Succeeded!\n", FTS_TP_SELFTEST);
+    }
+    return 0;
 }
 
 void fts_extra_proc_deinit(void)
 {
-	if (FTS_proc_tp_info_entry != NULL) {
-		remove_proc_entry(FTS_TP_INFO, NULL);
-		FTS_proc_tp_info_entry = NULL;
-		FTS_INFO("Removed /proc/%s\n", FTS_TP_INFO);
+    if (FTS_proc_tp_info_entry != NULL) {
+        remove_proc_entry(FTS_TP_INFO, NULL);
+        FTS_proc_tp_info_entry = NULL;
+        FTS_INFO("Removed /proc/%s\n", FTS_TP_INFO);
     }
 }

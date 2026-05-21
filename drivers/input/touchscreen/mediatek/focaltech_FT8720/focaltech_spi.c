@@ -16,30 +16,30 @@
  */
 
 /************************************************************************
-*
-* File Name: focaltech_spi.c
-*
-*    Author: FocalTech Driver Team
-*
-*   Created: 2019-03-21
-*
-*  Abstract: new spi protocol communication with TP
-*
-*   Version: v1.0
-*
-* Revision History:
-*
-************************************************************************/
+ *
+ * File Name: focaltech_spi.c
+ *
+ *    Author: FocalTech Driver Team
+ *
+ *   Created: 2019-03-21
+ *
+ *  Abstract: new spi protocol communication with TP
+ *
+ *   Version: v1.0
+ *
+ * Revision History:
+ *
+ ************************************************************************/
 
 /*****************************************************************************
-* Included header files
-*****************************************************************************/
+ * Included header files
+ *****************************************************************************/
 #include "focaltech_core.h"
 #include <linux/platform_data/spi-mt65xx.h>
 
 /*****************************************************************************
-* Private constant and macro definitions using #define
-*****************************************************************************/
+ * Private constant and macro definitions using #define
+ *****************************************************************************/
 #define SPI_RETRY_NUMBER            3
 #define CS_HIGH_DELAY               150 /* unit: us */
 #define SPI_BUF_LENGTH              4096
@@ -51,24 +51,24 @@
 #define SPI_DUMMY_BYTE              3
 #define SPI_HEADER_LENGTH           6   /*CRC*/
 /*****************************************************************************
-* Private enumerations, structures and unions using typedef
-*****************************************************************************/
+ * Private enumerations, structures and unions using typedef
+ *****************************************************************************/
 
 /*****************************************************************************
-* Static variables
-*****************************************************************************/
+ * Static variables
+ *****************************************************************************/
 
 /*****************************************************************************
-* Global variable or extern global variabls/functions
-*****************************************************************************/
+ * Global variable or extern global variabls/functions
+ *****************************************************************************/
 
 /*****************************************************************************
-* Static function prototypes
-*****************************************************************************/
+ * Static function prototypes
+ *****************************************************************************/
 
 /*****************************************************************************
-* functions body
-*****************************************************************************/
+ * functions body
+ *****************************************************************************/
 /* spi interface */
 
 static struct mtk_chip_config fts_mt_chip_conf = {
@@ -227,7 +227,7 @@ int fts_write(u8 *writebuf, u32 writelen)
                   writebuf[0], rxbuf[3], ret);
     }
 
-err_write:
+    err_write:
     if (txlen_need > SPI_BUF_LENGTH) {
         if (txbuf) {
             kfree(txbuf);
@@ -332,7 +332,7 @@ int fts_read(u8 *cmd, u32 cmdlen, u8 *data, u32 datalen)
                   rxbuf[3], ret);
     }
 
-err_read:
+    err_read:
     if (txlen_need > SPI_BUF_LENGTH) {
         if (txbuf) {
             kfree(txbuf);
@@ -404,7 +404,7 @@ int fts_spi_transfer_direct(u8 *writebuf, u32 writelen, u8 *readbuf, u32 readlen
     }
 
     ret = 0;
-err_spi_dir:
+    err_spi_dir:
     if (txlen > SPI_BUF_LENGTH) {
         if (txbuf) {
             kfree(txbuf);
@@ -457,4 +457,3 @@ int fts_bus_exit(struct fts_ts_data *ts_data)
     FTS_FUNC_EXIT();
     return 0;
 }
-
