@@ -292,10 +292,40 @@ static void lcm_set_util_funcs(const struct LCM_UTIL_FUNCS *util)
 #ifdef CONFIG_MTK_HIGH_FRAME_RATE
 static void lcm_dfps_int(struct LCM_DSI_PARAMS *dsi)
 {
-    dsi->dfps_enable = 0;
-    dsi->dfps_default_fps = 6000;
-    dsi->dfps_def_vact_tim_fps = 6000;
-    dsi->dfps_num = 0;
+    struct dfps_info *dfps_params = dsi->dfps_params;
+
+    dsi->dfps_enable = 1;
+    dsi->dfps_default_fps = 6000;/*real fps * 100, to support float*/
+    dsi->dfps_def_vact_tim_fps = 9000;/*real vact timing fps * 100*/
+
+    /* traversing array must less than DFPS_LEVELS */
+    /* DPFS_LEVEL0 */
+    dfps_params[0].level = DFPS_LEVEL0;
+    dfps_params[0].fps = 6000;/*real fps * 100, to support float*/
+    dfps_params[0].vact_timing_fps = 9000;/*real vact timing fps * 100*/
+    dfps_params[0].vertical_frontporch = 1248;
+    dfps_params[0].vertical_frontporch_for_low_power = 2200;
+
+    /* DPFS_LEVEL1 */
+    dfps_params[1].level = DFPS_LEVEL1;
+    dfps_params[1].fps = 9000;/*real fps * 100, to support float*/
+    dfps_params[1].vact_timing_fps = 9000;/*real vact timing fps * 100*/
+    dfps_params[1].vertical_frontporch = 10;
+    dfps_params[1].vertical_frontporch_for_low_power = 2200;
+
+    /* DPFS_LEVEL2 */
+    dfps_params[2].level = DFPS_LEVEL2;
+    dfps_params[2].fps = 4800;/*real fps * 100, to support float*/
+    dfps_params[2].vact_timing_fps = 9000;/*real vact timing fps * 100*/
+    dfps_params[2].vertical_frontporch = 2200;
+
+    /* DPFS_LEVEL3 */
+    dfps_params[3].level = DFPS_LEVEL3;
+    dfps_params[3].fps = 3600;/*real fps * 100, to support float*/
+    dfps_params[3].vact_timing_fps = 9000;/*real vact timing fps * 100*/
+    dfps_params[3].vertical_frontporch = 3750;
+
+    dsi->dfps_num = 4;
 }
 #endif
 
@@ -402,9 +432,9 @@ static void lcm_get_params(struct LCM_PARAMS *params)
     params->dsi.lcm_esd_check_table[0].cmd = 0x0a;
     params->dsi.lcm_esd_check_table[0].count = 1;
     params->dsi.lcm_esd_check_table[0].para_list[0] = 0x9c;
-    params->dsi.dynamic_fps_levels = 0;
-    params->max_refresh_rate = 60;
-    params->min_refresh_rate = 60;
+    //params->dsi.dynamic_fps_levels = 0;
+    //params->max_refresh_rate = 60;
+    //params->min_refresh_rate = 60;
 
     /* for ARR 2.0 */
     // params->max_refresh_rate = 60;
