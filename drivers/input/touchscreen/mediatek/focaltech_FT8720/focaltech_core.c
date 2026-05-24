@@ -2396,10 +2396,12 @@ static int __init fts_ts_init(void)
     if (IS_ERR_OR_NULL(mtkfb_lcm_name)){
         FTS_ERROR("mtkfb_lcm_name ERROR!\n");
     } else {
-        if (strcmp(mtkfb_lcm_name,"dsi_panel_m19a_42_03_0b_dsc_vdo_lcm_drv") == 0) {
-            FTS_ERROR("TP name: %s\n", mtkfb_lcm_name);
+        if (strcmp(mtkfb_lcm_name,"dsi_panel_m19a_42_03_0b_dsc_vdo_lcm_drv") == 0 ||
+            strcmp(mtkfb_lcm_name,"dsi_panel_m19a_42_03_0c_dsc_vdo_lcm_drv") == 0 ||
+            strcmp(mtkfb_lcm_name,"dsi_panel_m19a_42_03_0d_dsc_vdo_lcm_drv") == 0) {
+            FTS_INFO("TP name: %s\n", mtkfb_lcm_name);
         } else {
-            FTS_ERROR("Unknow Touch\n");
+            FTS_ERROR("Unknown touch panel\n");
             FTS_ERROR("TP name: %s\n", mtkfb_lcm_name);
         }
     }

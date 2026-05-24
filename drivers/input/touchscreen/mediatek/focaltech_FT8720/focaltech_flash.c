@@ -92,6 +92,7 @@ struct upgrade_setting_nf upgrade_setting_list[] = {
     {0x86, 0x32, 0, (64 * 1024),  (128 * 1024), 0xA5, 0x01, 12, 0, 1, 0, 0, 0},
     {0x86, 0x42, 0, (64 * 1024),  (128 * 1024), 0xA5, 0x01, 12, 0, 1, 0, 0, 0},
     {0x87, 0x20, 0, (88 * 1024),  (128 * 1024), 0xA5, 0x01, 8,  0, 2, 0, 1, 0},
+    {0x87, 0x25, 0, (88 * 1024),  (128 * 1024), 0xA5, 0x01, 8,  0, 2, 0, 1, 0},
     {0x87, 0x22, 0, (88 * 1024),  (128 * 1024), 0xA5, 0x01, 8,  0, 2, 0, 1, 0},
     {0x82, 0x01, 0, (96 * 1024),  (128 * 1024), 0xA5, 0x01, 8,  0, 2, 0, 0, 0},
     {0xF0, 0xC6, 0, (84 * 1024),  (128 * 1024), 0xA5, 0x01, 8,  0, 2, 0, 1, 0},
@@ -102,6 +103,26 @@ struct upgrade_setting_nf upgrade_setting_list[] = {
 struct fts_upgrade *fwupgrade;
 static u8 fw_version;
 static char tp_version_info[128] = "";
+extern char mtkfb_lcm_name[256];
+
+static void fts_get_request_fw_name(struct fts_upgrade *upg, char *fwname,
+				    size_t fwname_len)
+{
+	if (!strcmp(mtkfb_lcm_name,
+		    "dsi_panel_m19a_42_03_0c_dsc_vdo_lcm_drv")) {
+		snprintf(fwname, fwname_len, "%s", "focaltech_8725_fw.bin");
+		return;
+	}
+
+	if (!strcmp(mtkfb_lcm_name,
+		    "dsi_panel_m19a_42_03_0d_dsc_vdo_lcm_drv")) {
+		snprintf(fwname, fwname_len, "%s", "focaltech_8725_2_fw.bin");
+		return;
+	}
+
+	snprintf(fwname, fwname_len, "%s%s.bin",
+		 FTS_FW_NAME_PREX_WITH_REQUEST, upg->module_info->vendor_name);
+}
 
 static int fts_check_bootid(void)
 {
@@ -961,8 +982,7 @@ static int fts_fw_resume(bool need_reset, enum FW_TYPE fw_type)
     }
 
     if (FTS_FW_REQUEST_SUPPORT) {
-        snprintf(fwname, FILE_NAME_LENGTH, "%s%s.bin", \
-        FTS_FW_NAME_PREX_WITH_REQUEST, upg->module_info->vendor_name);
+        fts_get_request_fw_name(upg, fwname, sizeof(fwname));
         ret = request_firmware(&fw, fwname, upg->ts_data->dev);
         if (ret == 0) {
             FTS_INFO("firmware(%s) request successfully", fwname);
@@ -1122,9 +1142,7 @@ static int fts_get_fw_file_via_request_firmware(struct fts_upgrade *upg)
     u8 *tmpbuf = NULL;
     char fwname[FILE_NAME_LENGTH] = { 0 };
 
-    snprintf(fwname, FILE_NAME_LENGTH, "%s%s.bin", \
-    FTS_FW_NAME_PREX_WITH_REQUEST, \
-    upg->module_info->vendor_name);
+    fts_get_request_fw_name(upg, fwname, sizeof(fwname));
     FTS_INFO("firmware(%s)", fwname);
     ret = request_firmware(&fw, fwname, upg->ts_data->dev);
     if (0 == ret) {
