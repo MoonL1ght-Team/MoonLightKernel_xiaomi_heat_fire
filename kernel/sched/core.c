@@ -911,12 +911,11 @@ static void uclamp_sync_util_min_rt_default(void)
 	rcu_read_unlock();
 }
 
-static inline struct uclamp_se
-uclamp_tg_restrict(struct task_struct *p, enum uclamp_id clamp_id)
-{
-	/* Copy by value as we could modify it */
-	struct uclamp_se uc_req = p->uclamp_req[clamp_id];
 #ifdef CONFIG_UCLAMP_TASK_GROUP
+static inline struct uclamp_se
+uclamp_tg_restrict(struct task_struct *p, enum uclamp_id clamp_id,
+		   struct uclamp_se uc_req)
+{
 	unsigned int tg_min, tg_max, value;
 
 	/*
@@ -933,19 +932,20 @@ uclamp_tg_restrict(struct task_struct *p, enum uclamp_id clamp_id)
 	value = uc_req.value;
 	value = clamp(value, tg_min, tg_max);
 	uclamp_se_set(&uc_req, value, false);
-#endif
 
 	return uc_req;
 }
+#endif
 
 static inline struct uclamp_se
 uclamp_group_restrict(struct task_struct *p, enum uclamp_id clamp_id)
 {
-	struct uclamp_se uc_req;
+	struct uclamp_se uc_req = p->uclamp_req[clamp_id];
 #ifdef CONFIG_SCHED_TUNE
 	uc_req = uclamp_st_restrict(p, clamp_id);
-#else
-	uc_req = uclamp_tg_restrict(p, clamp_id);
+#endif
+#ifdef CONFIG_UCLAMP_TASK_GROUP
+	uc_req = uclamp_tg_restrict(p, clamp_id, uc_req);
 #endif
 	return uc_req;
 }
@@ -1190,7 +1190,7 @@ uclamp_update_active_tasks(struct cgroup_subsys_state *css)
 }
 #endif
 
-#if defined(CONFIG_UCLAMP_TASK_GROUP) && !defined(CONFIG_SCHED_TUNE)
+#ifdef CONFIG_UCLAMP_TASK_GROUP
 static void cpu_util_update_eff(struct cgroup_subsys_state *css);
 static void uclamp_update_root_tg(void)
 {
@@ -1205,7 +1205,7 @@ static void uclamp_update_root_tg(void)
 	cpu_util_update_eff(&root_task_group.css);
 	rcu_read_unlock();
 }
-#elif !defined(CONFIG_UCLAMP_TASK_GROUP) && !defined(CONFIG_SCHED_TUNE)
+#elif !defined(CONFIG_SCHED_TUNE)
 static void uclamp_update_root_tg(void) { }
 #endif
 
@@ -1248,9 +1248,12 @@ int sysctl_sched_uclamp_handler(struct ctl_table *table, int write,
 
 	if (update_root_tg) {
 		static_branch_enable(&sched_uclamp_used);
-#if defined(CONFIG_UCLAMP_TASK_GROUP) && defined(CONFIG_SCHED_TUNE)
+#ifdef CONFIG_UCLAMP_TASK_GROUP
+		uclamp_update_root_tg();
+#endif
+#ifdef CONFIG_SCHED_TUNE
 		uclamp_update_root_st();
-#else
+#elif !defined(CONFIG_UCLAMP_TASK_GROUP)
 		uclamp_update_root_tg();
 #endif
 	}
@@ -1433,20 +1436,23 @@ bool uclamp_boosted(struct task_struct *p)
 
 bool uclamp_latency_sensitive(struct task_struct *p)
 {
-#if defined(CONFIG_SCHED_TUNE)
-	return schedtune_prefer_idle(p) != 0;
-#elif defined(CONFIG_UCLAMP_TASK_GROUP)
+	bool latency_sensitive = false;
+#ifdef CONFIG_UCLAMP_TASK_GROUP
 	struct cgroup_subsys_state *css = task_css(p, cpu_cgrp_id);
 	struct task_group *tg;
+#endif
 
+#ifdef CONFIG_SCHED_TUNE
+	latency_sensitive = schedtune_prefer_idle(p) != 0;
+#endif
+#ifdef CONFIG_UCLAMP_TASK_GROUP
 	if (!css)
-		return false;
+		return latency_sensitive;
 	tg = container_of(css, struct task_group, css);
 
-	return tg->latency_sensitive;
-#else
-	return false;
+	latency_sensitive |= tg->latency_sensitive;
 #endif
+	return latency_sensitive;
 }
 #endif /* CONFIG_SMP */
 
@@ -1484,11 +1490,12 @@ static void __init init_uclamp(void)
 	uclamp_se_set(&uc_max, uclamp_none(UCLAMP_MAX), false);
 	for_each_clamp_id(clamp_id) {
 		uclamp_default[clamp_id] = uc_max;
-#if defined(CONFIG_UCLAMP_TASK_GROUP) && defined(CONFIG_SCHED_TUNE)
-		init_root_st_uclamp(clamp_id);
-#elif defined(CONFIG_UCLAMP_TASK_GROUP)
+#ifdef CONFIG_UCLAMP_TASK_GROUP
 		root_task_group.uclamp_req[clamp_id] = uc_max;
 		root_task_group.uclamp[clamp_id] = uc_max;
+#ifdef CONFIG_SCHED_TUNE
+		init_root_st_uclamp(clamp_id);
+#endif
 #endif
 	}
 }
@@ -7677,7 +7684,7 @@ static int cpu_cgroup_css_online(struct cgroup_subsys_state *css)
 	if (parent)
 		sched_online_group(tg, parent);
 
-#if defined(CONFIG_UCLAMP_TASK_GROUP) && !defined(CONFIG_SCHED_TUNE)
+#ifdef CONFIG_UCLAMP_TASK_GROUP
 	/* Propagate the effective uclamp value for the new group */
 	mutex_lock(&uclamp_mutex);
 	rcu_read_lock();
@@ -7764,7 +7771,7 @@ static void cpu_cgroup_attach(struct cgroup_taskset *tset)
 }
 
 
-#if defined(CONFIG_UCLAMP_TASK_GROUP) && !defined(CONFIG_SCHED_TUNE)
+#ifdef CONFIG_UCLAMP_TASK_GROUP
 static void cpu_util_update_eff(struct cgroup_subsys_state *css)
 {
 	struct cgroup_subsys_state *top_css = css;
@@ -8307,7 +8314,7 @@ static struct cftype cpu_legacy_files[] = {
 		.write_u64 = cpu_rt_period_write_uint,
 	},
 #endif
-#if defined(CONFIG_UCLAMP_TASK_GROUP) && !defined(CONFIG_SCHED_TUNE)
+#ifdef CONFIG_UCLAMP_TASK_GROUP
 	{
 		.name = "uclamp.min",
 		.flags = CFTYPE_NOT_ON_ROOT,
@@ -8494,7 +8501,7 @@ static struct cftype cpu_files[] = {
 		.write = cpu_max_write,
 	},
 #endif
-#if defined(CONFIG_UCLAMP_TASK_GROUP) && !defined(CONFIG_SCHED_TUNE)
+#ifdef CONFIG_UCLAMP_TASK_GROUP
 	{
 		.name = "uclamp.min",
 		.flags = CFTYPE_NOT_ON_ROOT,
