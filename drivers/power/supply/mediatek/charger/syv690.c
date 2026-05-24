@@ -806,7 +806,12 @@ static int SYV690_charging(struct charger_device *chg_dev, bool enable)
 	u8 val;
 	
 	ret = SYV690_field_write(chgInfo, F_CHG_CFG, enable);
-	pr_err("%s charger %s\n", enable ? "enable" : "disable", ret < 0 ? "failed" : "successfully");
+	if (ret < 0) {
+		pr_err("%s charger failed: %d\n",
+		       enable ? "enable" : "disable", ret);
+		return ret;
+	}
+	pr_debug("%s charger configured\n", enable ? "enable" : "disable");
 	ret = SYV690_field_read(chgInfo, F_CHG_CFG);
 	/*
 			ret < 0 read fail; 1 enable 0 disable
@@ -831,7 +836,8 @@ int SYV690_reset_watchdog_timer(struct SYV690_device *chgInfo)
 {
 	int ret = 0;
 	ret = SYV690_field_write(chgInfo, F_WD_RST, 1);
-	pr_err("SYV690_reset_watchdog_timer %s\n", ret < 0 ? "failed" : "successfully");
+	if (ret < 0)
+		pr_err("SYV690_reset_watchdog_timer failed: %d\n", ret);
 	return ret;
 }
 EXPORT_SYMBOL_GPL(SYV690_reset_watchdog_timer);
@@ -1053,7 +1059,7 @@ static int SYV690_dump_register(struct charger_device *chg_dev)
 
         }
 
-	pr_err("masterIC reg_info:%s\n", reg_dump_str);
+	pr_debug("masterIC reg_info:%s\n", reg_dump_str);
 
         return 0;
 }
@@ -1121,9 +1127,10 @@ static int SYV690_set_ichg(struct charger_device *chg_dev, u32 curr)
 		reg_val = (curr/1000)/SC89890H_ICHG_STEP;
 	else
 		reg_val = (curr/1000)/SYV690_ICHG_STEP;
-	pr_err("Config charging Current  = %d uA\n", curr);
+	pr_debug("Config charging Current = %d uA\n", curr);
 	ret = SYV690_field_write(chgInfo, F_ICHG, reg_val);
-	pr_err(" SYV690_set_ichg  write :%s\n",  ret < 0 ? "failed" : "successfully");
+	if (ret < 0)
+		pr_err("SYV690_set_ichg failed: %d\n", ret);
 	return ret;
 }
 /*
@@ -1141,7 +1148,7 @@ static int SYV690_get_aicr(struct charger_device *chg_dev, u32 *curr)
 	if(ret >= 0){
 		reg_val = ret;
 		*curr  = (reg_val * 50 + 100)*1000;
-		pr_err("Config charging Current  = %d uA\n", *curr);
+		pr_debug("Config charging Current = %d uA\n", *curr);
 	}else{
 		pr_err("Failed to get aicr!\n");
 	}
@@ -1160,9 +1167,10 @@ static int SYV690_set_aicr(struct charger_device *chg_dev, u32 curr)
 			curr -- ua ; SYV690_AICR_OFFSET --ma
 	*/
 	val = (curr/1000  - SYV690_AICR_OFFSET)/SYV690_AICR_STEP;
-	pr_err("Config Input Current  = %d uA\n", curr);
+	pr_debug("Config Input Current = %d uA\n", curr);
 	ret = SYV690_field_write(chgInfo, F_IILIM, val);
-	pr_err(" SYV690_set_icl  write :%s\n",  ret < 0 ? "failed" : "successfully");
+	if (ret < 0)
+		pr_err("SYV690_set_icl failed: %d\n", ret);
 	return ret;
 }
 /*
@@ -1179,7 +1187,7 @@ static int SYV690_get_vchg(struct charger_device *chg_dev, u32 *volt)
 	if(ret >= 0){
 		reg_val = ret;
 		*volt  = (reg_val * SYV690_VREG_STEP + SYV690_VREG_OFFSET)*1000;
-		pr_err("SYV690_get_vchg  = %d mV\n", (*volt)/1000);
+		pr_debug("SYV690_get_vchg = %d mV\n", (*volt)/1000);
 	}else{
 		pr_err("Failed to get vchg!\n");
 	}
@@ -1194,10 +1202,11 @@ static int SYV690_set_vchg(struct charger_device *chg_dev, u32 volt)
 	struct SYV690_device *chgInfo = dev_get_drvdata(&chg_dev->dev);
 	int ret = 0;
 	u8 reg_val = (volt/1000 - SYV690_VREG_OFFSET)/SYV690_VREG_STEP;
-	pr_err("SYV690_set_vchg  = %d mV\n", volt/1000);
+	pr_debug("SYV690_set_vchg = %d mV\n", volt/1000);
 
 	ret = SYV690_field_write(chgInfo, F_VREG, reg_val);
-	pr_err(" SYV690_set_vchg  write :%s\n",  ret < 0 ? "failed" : "successfully");
+	if (ret < 0)
+		pr_err("SYV690_set_vchg failed: %d\n", ret);
 
 	return ret;
 }
@@ -1221,13 +1230,14 @@ static int SYV690_set_mivr(struct charger_device *chg_dev, u32 volt)
 	int ret = 0;
 	u8 val = 0;
 	int mVolt = volt/1000;
-	pr_err("SYV690_set_ivl volt = %d mV\n",mVolt);
+	pr_debug("SYV690_set_ivl volt = %d mV\n", mVolt);
 	/* offset 2600 ,step 100mv*/
        if(mVolt < SYV690_MIVR_OFFSET)
 	   	mVolt = SYV690_MIVR_OFFSET;
 	val = (mVolt - SYV690_MIVR_OFFSET)/SYV690_MIVR_STEP;
 	ret = SYV690_field_write(chgInfo, F_VINDPM, val);
-	pr_err(" SYV690_set_ivl  write :%s\n",  ret < 0 ? "failed" : "successfully");
+	if (ret < 0)
+		pr_err("SYV690_set_ivl failed: %d\n", ret);
 	return ret;
 
 }
@@ -1360,7 +1370,7 @@ static int SYV690_is_charging_done(struct charger_device *chg_dev, bool *done)
 			}
 		}
 		*done  = (ret == 3);
-		pr_err("SYV690_is_charging_done  = %d \n",ret);
+		pr_debug("SYV690_is_charging_done = %d\n", ret);
 		if ((ret == 3) && (battery_get_vbus() > 7800)) {
 			SYV690_field_write(chgInfo, F_VINDPM, 0x14);
 			if (g_chg_info->chg_type == HVDCP_CHARGER) {

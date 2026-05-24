@@ -81,15 +81,17 @@ prepare_anykernel() {
 	git -C "$ANYKERNEL_CACHE" archive "$ANYKERNEL_COMMIT" | tar -x -C "$package_dir"
 	rm -rf "$package_dir/.github" "$package_dir/README.md"
 	cp "$image" "$package_dir/$(basename "$image")"
+	cp "$ROOT_DIR/AUTHORS" "$package_dir/AUTHORS"
 	[[ -f "$OUT_DIR/arch/arm64/boot/dtbo.img" ]] &&
 		cp "$OUT_DIR/arch/arm64/boot/dtbo.img" "$package_dir/dtbo.img"
 
 	cat > "$package_dir/anykernel.sh" <<EOF
 ### AnyKernel3 Ramdisk Mod Script
-## Xiaomi Redmi 12 (fire/heat) kernel package
+## MoonLightKernel for Xiaomi Redmi 12 (fire/heat)
+## Authors: 1VicTim1 and Flasix67
 
 properties() { '
-kernel.string=Inferno Optimized ${DEVICE} by 1VicTim1
+kernel.string=MoonLightKernel ${DEVICE} by 1VicTim1 and Flasix67
 do.devicecheck=1
 do.modules=0
 do.systemless=1
@@ -118,7 +120,7 @@ EOF
 
 	version="$(git -C "$ROOT_DIR" rev-parse --short HEAD 2>/dev/null || printf local)"
 	mkdir -p "$DIST_DIR"
-	zip_name="$DIST_DIR/Inferno-${DEVICE}-${version}-AnyKernel3.zip"
+	zip_name="$DIST_DIR/MoonLightKernel-${DEVICE}-${version}-AnyKernel3.zip"
 	rm -f "$zip_name"
 	(cd "$package_dir" && zip -qr9 "$zip_name" . -x '.git*')
 	printf 'AnyKernel3 package: %s\n' "$zip_name"

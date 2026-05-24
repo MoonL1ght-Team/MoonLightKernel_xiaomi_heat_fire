@@ -1,8 +1,11 @@
-Inferno kernel for Xiaomi Redmi 12 (fire/heat)
-================================================
+MoonLightKernel for Xiaomi Redmi 12 (fire/heat)
+=================================================
 
 This tree builds the MediaTek arm64 kernel for Xiaomi Redmi 12 variants and
 packages the result as an AnyKernel3 flashable ZIP.
+
+Maintainers are listed in ``AUTHORS``: 1VicTim1 and Flasix67.  The project
+retains the original repository history and existing contributor attribution.
 
 Build
 -----
@@ -38,4 +41,6 @@ Kernel configuration
 
 The production ``fire_defconfig`` retains the existing performance-oriented
 ThinLTO and scheduler settings.  It also enables relative kallsyms addresses
-to reduce symbol-table memory use while preserving kernel symbol lookup.
+to reduce symbol-table memory use while preserving kernel symbol lookup, and
+enables Android schedtune cgroups required by the userspace ``/dev/stune``
+policy assignments.
