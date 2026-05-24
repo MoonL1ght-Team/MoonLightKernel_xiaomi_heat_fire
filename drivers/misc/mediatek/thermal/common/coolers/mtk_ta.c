@@ -68,7 +68,7 @@ get_image_sensor_state(void)
 
 static struct sock *daemo_nl_sk;
 static void ta_nl_send_to_user(
-	int pid, int seq, struct tad_nl_msg_t *reply_msg);
+	u32 portid, int seq, struct tad_nl_msg_t *reply_msg);
 
 static int g_tad_pid;
 static bool init_flag;
@@ -286,7 +286,8 @@ int ta_get_ttj(void)
 	return g_tad_ttj;
 }
 
-static void ta_nl_send_to_user(int pid, int seq, struct tad_nl_msg_t *reply_msg)
+static void ta_nl_send_to_user(u32 portid, int seq,
+	struct tad_nl_msg_t *reply_msg)
 {
 	struct sk_buff *skb;
 	struct nlmsghdr *nlh;
@@ -301,18 +302,18 @@ static void ta_nl_send_to_user(int pid, int seq, struct tad_nl_msg_t *reply_msg)
 		g_ta_status = g_ta_status | 0x00010000;
 		return;
 	}
-	nlh = nlmsg_put(skb, pid, seq, 0, size, 0);
+	nlh = nlmsg_put(skb, 0, seq, 0, size, 0);
 	data = NLMSG_DATA(nlh);
 	memcpy(data, reply_msg, size);
 	NETLINK_CB(skb).portid = 0; /* from kernel */
 	NETLINK_CB(skb).dst_group = 0; /* unicast */
 
 	tsta_dprintk(
-	"[%s] netlink_unicast size=%d tad_cmd=%d pid=%d\n", __func__,
-		size, reply_msg->tad_cmd, pid);
+	"[%s] netlink_unicast size=%d tad_cmd=%d portid=%u\n", __func__,
+		size, reply_msg->tad_cmd, portid);
 
 
-	ret = netlink_unicast(daemo_nl_sk, skb, pid, MSG_DONTWAIT);
+	ret = netlink_unicast(daemo_nl_sk, skb, portid, MSG_DONTWAIT);
 	if (ret < 0) {
 		g_ta_status = g_ta_status | 0x00000010;
 		pr_notice("[%s] send failed %d\n", __func__, ret);
@@ -327,7 +328,7 @@ static void ta_nl_send_to_user(int pid, int seq, struct tad_nl_msg_t *reply_msg)
 
 static void ta_nl_data_handler(struct sk_buff *skb)
 {
-	u32 pid;
+	u32 portid;
 	kuid_t uid;
 	int seq;
 	void *data;
@@ -336,7 +337,7 @@ static void ta_nl_data_handler(struct sk_buff *skb)
 	int size = 0;
 
 	nlh = (struct nlmsghdr *)skb->data;
-	pid = NETLINK_CREDS(skb)->pid;
+	portid = NETLINK_CB(skb).portid;
 	uid = NETLINK_CREDS(skb)->uid;
 	seq = nlh->nlmsg_seq;
 
@@ -359,7 +360,7 @@ static void ta_nl_data_handler(struct sk_buff *skb)
 	memset(&tad_ret_msg, 0, size);
 
 	atm_ctrl_cmd_from_user(data, &tad_ret_msg);
-	ta_nl_send_to_user(pid, seq, &tad_ret_msg);
+	ta_nl_send_to_user(portid, seq, &tad_ret_msg);
 	tsta_dprintk("[%s] send to user space process done\n", __func__);
 
 
@@ -559,4 +560,3 @@ static int __init ta_init(void)
 
 
 module_init(ta_init);
-
