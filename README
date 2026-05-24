@@ -1,19 +1,41 @@
-Linux kernel
-============
+Inferno kernel for Xiaomi Redmi 12 (fire/heat)
+================================================
 
-There are several guides for kernel developers and users. These guides can
-be rendered in a number of formats, like HTML and PDF. Please read
-Documentation/admin-guide/README.rst first.
+This tree builds the MediaTek arm64 kernel for Xiaomi Redmi 12 variants and
+packages the result as an AnyKernel3 flashable ZIP.
 
-In order to build the documentation, use ``make htmldocs`` or
-``make pdfdocs``.  The formatted documentation can also be read online at:
+Build
+-----
 
-    https://www.kernel.org/doc/html/latest/
+Dependencies on the host are ``bash``, ``make``, ``curl``, ``tar``, ``git``,
+``zip`` and ``ccache``.  The build script downloads the pinned Android
+``clang-r383902b`` toolchain from AOSP into the user cache on first use, and
+keeps compiler objects in the ccache directory for faster rebuilds.
 
-There are various text files in the Documentation/ subdirectory,
-several of them using the Restructured Text markup notation.
-See Documentation/00-INDEX for a list of what is contained in each file.
+::
 
-Please read the Documentation/process/changes.rst file, as it contains the
-requirements for building and running the kernel, and information about
-the problems which may result by upgrading your kernel.
+    ./build.sh fire
+    ./build.sh heat
+
+The default target is ``fire``.  Output kernel objects are written below
+``out/<device>/`` and the flashable archive is written to ``dist/``.
+AnyKernel3 is fetched from the upstream ``osm0sis/AnyKernel3`` repository at a
+pinned revision and configured for the ``fire``/``heat`` device names, boot
+partition auto-slot detection and ramdisk preservation.
+
+Useful overrides
+----------------
+
+::
+
+    JOBS=8 ./build.sh fire
+    TOOLCHAIN_DIR=/path/to/clang-r383902b ./build.sh fire
+    CCACHE_DIR=/path/to/ccache CCACHE_MAXSIZE=20G ./build.sh heat
+    ./build.sh fire clean
+
+Kernel configuration
+--------------------
+
+The production ``fire_defconfig`` retains the existing performance-oriented
+ThinLTO and scheduler settings.  It also enables relative kallsyms addresses
+to reduce symbol-table memory use while preserving kernel symbol lookup.
