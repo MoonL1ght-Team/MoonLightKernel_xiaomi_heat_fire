@@ -1948,7 +1948,7 @@ void mtk_idle_set_clkmux_addr(void)
 		clkmux_addr[i] = 0x10000040 + i * 0x10;
 }
 
-void __init mtk_cpuidle_framework_init(void)
+void mtk_cpuidle_framework_init(void)
 {
 	#if !defined(CONFIG_MACH_MT6739)
 	idle_ver("[%s]entry!!\n", __func__);
@@ -1998,4 +1998,3 @@ void __init mtk_cpuidle_framework_init(void)
 	mtk_idle_profile_init();
 }
 EXPORT_SYMBOL(mtk_cpuidle_framework_init);
-

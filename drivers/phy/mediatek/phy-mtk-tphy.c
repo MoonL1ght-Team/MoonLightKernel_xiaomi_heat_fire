@@ -1552,7 +1552,6 @@ static void u2_phy_instance_set_mode(struct mtk_tphy *tphy,
 				     enum phy_mode mode)
 {
 	struct u2phy_banks *u2_banks = &instance->u2_banks;
-	struct device *dev = &instance->phy->dev;
 	u32 tmp;
 
 	tmp = readl(u2_banks->com + U3P_U2PHYDTM1);

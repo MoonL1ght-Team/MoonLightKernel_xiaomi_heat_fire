@@ -1240,14 +1240,13 @@ static ssize_t
 thermal_boost_show(struct device *dev,
 				struct device_attribute *attr, char *buf)
 {
-	return snprintf(buf, PAGE_SIZE, boost_buf);
+	return scnprintf(buf, PAGE_SIZE, "%s", boost_buf);
 }
 static ssize_t
 thermal_boost_store(struct device *dev,
 				struct device_attribute *attr, const char *buf, size_t len)
 {
-	int ret;
-	ret = snprintf(boost_buf, PAGE_SIZE, buf);
+	scnprintf(boost_buf, sizeof(boost_buf), "%.*s", (int)len, buf);
 	return len;
 }
 static DEVICE_ATTR(boost, 0644,
@@ -1335,13 +1334,14 @@ static ssize_t
 thermal_board_sensor_temp_show(struct device *dev,
 				struct device_attribute *attr, char *buf)
 {
-	return snprintf(buf, PAGE_SIZE, board_sensor_temp);
+	return scnprintf(buf, PAGE_SIZE, "%s", board_sensor_temp);
 }
 static ssize_t
 thermal_board_sensor_temp_store(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t len)
 {
-	snprintf(board_sensor_temp, PAGE_SIZE, buf);
+	scnprintf(board_sensor_temp, sizeof(board_sensor_temp), "%.*s",
+		  (int)len, buf);
 	return len;
 }
 static DEVICE_ATTR(board_sensor_temp, 0664,

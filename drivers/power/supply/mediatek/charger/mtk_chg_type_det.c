@@ -693,7 +693,9 @@ static int pd_tcp_notifier_call(struct notifier_block *pnb,
 			}
 			pr_info("typec_mode = %d \n",cti->typec_mode);
 			plug_in_out_handler(cti, true, false);
+#if IS_REACHABLE(CONFIG_TOUCHSCREEN_MTK)
 			tpd_charger_detect_notifier_call_chain(TPD_DETECT_USB_IN,NULL);
+#endif
 		} else if ((noti->typec_state.old_state == TYPEC_ATTACHED_SNK ||
 		    noti->typec_state.old_state == TYPEC_ATTACHED_CUSTOM_SRC ||
 		    noti->typec_state.old_state == TYPEC_ATTACHED_NORP_SRC ||
@@ -739,7 +741,9 @@ static int pd_tcp_notifier_call(struct notifier_block *pnb,
 			cti->typec_mode = POWER_SUPPLY_TYPEC_NONE;
 			pr_info("%s USB Plug out\n", __func__);
 			plug_in_out_handler(cti, false, false);
+#if IS_REACHABLE(CONFIG_TOUCHSCREEN_MTK)
 			tpd_charger_detect_notifier_call_chain(TPD_DETECT_USB_OUT,NULL);
+#endif
 		} else if (noti->typec_state.old_state == TYPEC_ATTACHED_SRC &&
 			noti->typec_state.new_state == TYPEC_ATTACHED_SNK) {
 			pr_info("%s Source_to_Sink\n", __func__);

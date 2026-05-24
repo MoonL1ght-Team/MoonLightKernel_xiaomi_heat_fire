@@ -16,7 +16,9 @@ static struct situation_context *situation_context_obj;
 static struct situation_init_info *
 	situation_init_list[max_situation_support] = {0};
 
+#if IS_REACHABLE(CONFIG_MTK_SAR_HUB)
 int sar_factory_enable_calibration(void);
+#endif
 
 static struct situation_context *situation_context_alloc_object(void)
 {
@@ -620,8 +622,11 @@ static ssize_t testcali_store(struct device *dev,
 		pr_debug("kstrtoint fail\n");
 		return 0;
 	}
-	if (enable == 1)
+	if (enable == 1) {
+#if IS_REACHABLE(CONFIG_MTK_SAR_HUB)
 		sar_factory_enable_calibration();
+#endif
+	}
 	return count;
 }
 

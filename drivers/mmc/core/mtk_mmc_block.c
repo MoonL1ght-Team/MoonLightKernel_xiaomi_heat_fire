@@ -296,7 +296,7 @@ EXPORT_SYMBOL_GPL(mtk_btag_pidlog_add_mmc);
 static void mt_bio_context_eval(struct mt_bio_context *ctx)
 {
 	struct mt_bio_context_task *tsk;
-	uint64_t min, period, tsk_start, usage, result;
+	uint64_t min, period, tsk_start;
 	int i;
 
 	min = ctx->period_end_t;
@@ -1005,4 +1005,3 @@ int mt_mmc_biolog_exit(void)
 
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Mediatek MMC Block IO Log");
-

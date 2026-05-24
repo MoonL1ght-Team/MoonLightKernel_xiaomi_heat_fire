@@ -46,7 +46,7 @@ out:
     return err;
 }
 
-#undef MICRON_HR_CMD56 1
+#undef MICRON_HR_CMD56
 
 int get_micron_hr(struct mmc_card *card, char *buf)
 {
@@ -120,7 +120,7 @@ out:
 
 int get_ymtc_hr(struct mmc_card *card, char *buf)
 {
-    int err = 0, i = 0;
+    int err = 0;
     int status;
     if (!strncmp(card->cid.prod_name, "Y0S128", 6) ||
         !strncmp(card->cid.prod_name, "Y0S064", 6) ||

@@ -796,6 +796,7 @@ int ps_send_touch_event(int32_t data){
 EXPORT_SYMBOL_GPL(ps_send_touch_event);
 
 
+#if IS_REACHABLE(CONFIG_TOUCHSCREEN_MTK)
 struct notifier_block proxmity_ready_nb;
 
 
@@ -820,6 +821,7 @@ int ps_register_recive_touch_event_callback(void)
 
 	return tpd_register_client(&proxmity_ready_nb);
 }
+#endif
 
 
 static int ps_enable_nodata(int en)
@@ -1216,10 +1218,12 @@ static int __init alspshub_init(void)
 		return -1;
 	}
 	alsps_driver_add(&alspshub_init_info);
+#if IS_REACHABLE(CONFIG_TOUCHSCREEN_MTK)
 	if (ps_register_recive_touch_event_callback()) {
 		pr_err("jyx %s fail ret\n", __func__);
 		return -1;
 	}
+#endif
 	return 0;
 }
 

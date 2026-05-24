@@ -134,7 +134,7 @@ static struct flash_operation **kp_pflash_op;
 static struct driver_operation **kp_pdriver_op;
 #endif
 
-#if defined(HX_ZERO_FLASH) && defined(CONFIG_TOUCHSCREEN_HIMAX_INCELL)
+#if defined(HX_ZERO_FLASH) && defined(CONFIG_TOUCHSCREEN_HIMAX_HX83102P_INCELL)
 static struct zf_operation **kp_pzf_op;
 static int *kp_G_POWERONOF;
 #endif
@@ -146,7 +146,7 @@ static u8 *kp_HX_EXCP_RESET_ACTIVATE;
 #endif
 
 #if 0//defined(HX_ZERO_FLASH) && defined(HX_CODE_OVERLAY)
-#if defined(CONFIG_TOUCHSCREEN_HIMAX_INCELL)
+#if defined(CONFIG_TOUCHSCREEN_HIMAX_HX83102P_INCELL)
 static uint8_t **kp_ovl_idx;
 #endif
 #endif
@@ -212,7 +212,7 @@ extern struct flash_operation *pflash_op;
 extern struct driver_operation *pdriver_op;
 #endif
 
-#if defined(HX_ZERO_FLASH) && defined(CONFIG_TOUCHSCREEN_HIMAX_INCELL)
+#if defined(HX_ZERO_FLASH) && defined(CONFIG_TOUCHSCREEN_HIMAX_HX83102P_INCELL)
 extern struct zf_operation *pzf_op;
 extern int G_POWERONOF;
 #endif
@@ -224,7 +224,7 @@ extern u8 HX_EXCP_RESET_ACTIVATE;
 #endif
 
 #if 0//defined(HX_ZERO_FLASH) && defined(HX_CODE_OVERLAY)
-#if defined(CONFIG_TOUCHSCREEN_HIMAX_INCELL)
+#if defined(CONFIG_TOUCHSCREEN_HIMAX_HX83102P_INCELL)
 extern uint8_t *ovl_idx;
 #endif
 #endif
@@ -314,7 +314,7 @@ static int32_t himax_ic_setup_external_symbols(void)
 	assert_on_symbol_func(himax_int_gpio_read);
 	assert_on_symbol_func(himax_gpio_power_config);
 
-#if defined(HX_ZERO_FLASH) && defined(CONFIG_TOUCHSCREEN_HIMAX_INCELL)
+#if defined(HX_ZERO_FLASH) && defined(CONFIG_TOUCHSCREEN_HIMAX_HX83102P_INCELL)
 	assert_on_symbol(pzf_op);
 	assert_on_symbol(G_POWERONOF);
 #endif
@@ -353,7 +353,7 @@ static int32_t himax_ic_setup_external_symbols(void)
 	assert_on_symbol(HX_EXCP_RESET_ACTIVATE);
 #endif
 #if 0//defined(HX_ZERO_FLASH) && defined(HX_CODE_OVERLAY)
-#if defined(CONFIG_TOUCHSCREEN_HIMAX_INCELL)
+#if defined(CONFIG_TOUCHSCREEN_HIMAX_HX83102P_INCELL)
 	assert_on_symbol(ovl_idx);
 #endif
 #endif

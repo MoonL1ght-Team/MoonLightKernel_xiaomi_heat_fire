@@ -9016,16 +9016,6 @@ int primary_display_capture_framebuffer_ovl(unsigned long pbuf,
 	enum UNIFIED_COLOR_FMT ufmt)
 {
 	int ret = 0;
-#ifdef CONFIG_MTK_M4U
-	unsigned int w_xres = primary_display_get_width();
-	unsigned int h_yres = primary_display_get_height();
-	unsigned int pixel_byte = primary_display_get_bpp() / 8;
-	int buffer_size = h_yres * w_xres * pixel_byte;
-	enum DISP_MODULE_ENUM after_eng = DISP_MODULE_OVL0;
-	int tmp;
-	struct m4u_client_t *m4uClient = NULL;
-	unsigned int mva = 0;
-#endif
 	DISPMSG("primary capture: begin\n");
 
 	disp_sw_mutex_lock(&(pgc->capture_lock));

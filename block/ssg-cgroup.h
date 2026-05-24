@@ -20,6 +20,11 @@ static struct cgroup_subsys_state *blkcg_css(void)
 	return task_css(current, io_cgrp_id);
 }
 
+static inline struct blkcg_gq *ssg_blkcg_lookup(struct request_queue *q)
+{
+	return blkg_lookup(css_to_blkcg(blkcg_css()), q);
+}
+
 struct ssg_blkg {
 	struct blkg_policy_data pd; /* must be the first member */
 
@@ -69,6 +74,11 @@ void ssg_blkcg_inc_rq(struct blkcg_gq *blkg)
 
 void ssg_blkcg_dec_rq(struct blkcg_gq *blkg)
 {
+}
+
+static inline struct blkcg_gq *ssg_blkcg_lookup(struct request_queue *q)
+{
+	return NULL;
 }
 #endif
 

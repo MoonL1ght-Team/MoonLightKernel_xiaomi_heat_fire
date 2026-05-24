@@ -527,8 +527,8 @@ static ssize_t show_lcm_cabc(struct device *device,
 	return(snprintf(buf, PAGE_SIZE, "%d\n", data));
 }
 
+#if IS_REACHABLE(CONFIG_KTD3136_SUPPORT) || IS_REACHABLE(CONFIG_LM3697_SUPPORT)
 unsigned int hbm_mode;
-extern char *saved_command_line;
 extern int ktd_hbm_set(enum backlight_hbm_mode hbm_mode);
 extern int ti_hbm_set(enum backlight_hbm_mode hbm_mode);
 static ssize_t show_hbm_state(struct device *dev, struct device_attribute *attr, char *buf)
@@ -556,14 +556,19 @@ static ssize_t store_hbm_state(struct device *dev, struct device_attribute *attr
 		hbm_mode = HBM_MODE_DEFAULT;
 
 	if (bkl_id == 1) {
+#if IS_REACHABLE(CONFIG_LM3697_SUPPORT)
 		ti_hbm_set((enum backlight_hbm_mode)hbm_mode);
 		printk("[%s]: Ti, set hbm_mode = %d\n", __func__, hbm_mode);
+#endif
 	} else {
+#if IS_REACHABLE(CONFIG_KTD3136_SUPPORT)
 		ktd_hbm_set((enum backlight_hbm_mode)hbm_mode);
 		printk("[%s]: ktd, set hbm_mode = %d\n", __func__, hbm_mode);
+#endif
 	}
 	return len;
 }
+#endif
 
 /* When cmap is added back in it should be a binary attribute
  * not a text one. Consideration should also be given to converting
@@ -585,7 +590,9 @@ static struct device_attribute device_attrs[] = {
 	__ATTR(bl_curve, S_IRUGO|S_IWUSR, show_bl_curve, store_bl_curve),
 #endif
 	__ATTR(cabc, S_IRUGO|S_IWUSR, show_lcm_cabc, store_lcm_cabc),
+#if IS_REACHABLE(CONFIG_KTD3136_SUPPORT) || IS_REACHABLE(CONFIG_LM3697_SUPPORT)
 	__ATTR(hbm, S_IRUGO|S_IWUSR, show_hbm_state, store_hbm_state),
+#endif
 };
 
 int fb_init_device(struct fb_info *fb_info)

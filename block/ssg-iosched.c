@@ -741,7 +741,7 @@ static void ssg_prepare_request(struct request *rq, struct bio *bio)
 		set_thread_group_info(rqi);
 
 		rcu_read_lock();
-		rqi->blkg = blkg_lookup(css_to_blkcg(blkcg_css()), rq->q);
+		rqi->blkg = ssg_blkcg_lookup(rq->q);
 		ssg_blkcg_inc_rq(rqi->blkg);
 		rcu_read_unlock();
 	}

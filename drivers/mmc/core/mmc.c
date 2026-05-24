@@ -1742,7 +1742,9 @@ static int mmc_hs200_tuning(struct mmc_card *card)
  * In the case of a resume, "oldcard" will contain the card
  * we're trying to reinitialise.
  */
+#if IS_REACHABLE(CONFIG_MI_MEMORY_SYSFS)
 extern struct mmc_card *mv_card;
+#endif
 static int mmc_init_card(struct mmc_host *host, u32 ocr,
 	struct mmc_card *oldcard)
 {
@@ -1842,13 +1844,14 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
 		if (err)
 			goto free_card;
 	}
-        if(!mv_card) {
-        mv_card = card;
-        pr_info("mv_card NULL\n");
-    }
-        else {
-        pr_info("mv_card OK!\n");
-    }
+#if IS_REACHABLE(CONFIG_MI_MEMORY_SYSFS)
+	if (!mv_card) {
+		mv_card = card;
+		pr_info("mv_card NULL\n");
+	} else {
+		pr_info("mv_card OK!\n");
+	}
+#endif
 	/*
 	 * handling only for cards supporting DSR and hosts requesting
 	 * DSR configuration

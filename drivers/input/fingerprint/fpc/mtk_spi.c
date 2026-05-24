@@ -305,8 +305,9 @@ static DEVICE_ATTR(irq, S_IRUSR | S_IWUSR, irq_get, irq_ack);
 static ssize_t clk_enable_set(struct device *device,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
-        pr_err("%s enter\n", __func__);
 	struct fpc_data *fpc = dev_get_drvdata(device);
+
+	pr_err("%s enter\n", __func__);
 	return set_clks(fpc, (*buf == '1')) ? : count;
 }
 static DEVICE_ATTR(clk_enable, S_IWUSR, NULL, clk_enable_set);

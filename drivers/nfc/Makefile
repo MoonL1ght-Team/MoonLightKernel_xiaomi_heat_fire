@@ -3,7 +3,9 @@
 # Makefile for nfc devices
 #
 
-obj-y                           += pn557/
+ifneq ($(filter y,$(CONFIG_NXP_NFC_SN1XX) $(CONFIG_NXP_NFC_PN8XT)),)
+obj-y				+= pn557/
+endif
 obj-$(CONFIG_NFC_FDP)		+= fdp/
 obj-$(CONFIG_NFC_PN544)		+= pn544/
 obj-$(CONFIG_NFC_MICROREAD)	+= microread/

@@ -33,7 +33,7 @@
 /*#define HX_CONFIG_FB*/ /* Need Enable if mtk_tpd not support suspend/resume */
 
 extern struct device *g_device;
-#if defined(CONFIG_TOUCHSCREEN_HIMAX_DEBUG)
+#if defined(CONFIG_TOUCHSCREEN_HIMAX_HX83102P_DEBUG)
 #define D(x...) dev_dbg(g_device, "[HXTP] " x)
 #define I(x...) dev_info(g_device, "[HXTP] " x)
 #define W(x...) dev_info(g_device, "[HXTP][WARNING] " x)

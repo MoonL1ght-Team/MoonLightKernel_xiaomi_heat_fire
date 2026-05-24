@@ -646,14 +646,14 @@ static int ovl_layer_config(enum DISP_MODULE_ENUM module, unsigned int layer,
 	} else {
 		unsigned int size;
 		int m4u_port;
+#ifdef CONFIG_MTK_TRUSTED_MEMORY_SUBSYSTEM
+		enum TRUSTED_MEM_REQ_TYPE mem_type = -1;
+#endif
 
 		size = (dst_h - 1) * cfg->src_pitch + dst_w * Bpp;
 		m4u_port = module_to_m4u_port(module);
 
 #ifdef CONFIG_MTK_TRUSTED_MEMORY_SUBSYSTEM
-		enum TRUSTED_MEM_REQ_TYPE mem_type;
-		mem_type = -1;
-
 		if ((module == DISP_MODULE_OVL0_2L) && (cfg->hnd != NULL)) {
 			int sec = -1;
 			int sec_id = -1;

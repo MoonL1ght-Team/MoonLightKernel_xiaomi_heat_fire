@@ -1311,7 +1311,6 @@ void cmdq_pkt_sleep_by_poll(struct cmdq_pkt *pkt, u32 tick)
 	const u32 timeout_en = cmdq_mbox_get_base_pa(cl->chan) +
 		CMDQ_TPR_TIMEOUT_EN;
 	u32 begin_mark;
-	u64 *inst;
 	dma_addr_t cmd_pa;
 
 	cmdq_pkt_write_indriect(pkt, NULL, timeout_en, CMDQ_CPR_TPR_MASK, ~0);
@@ -2490,4 +2489,3 @@ void cmdq_pkt_set_err_cb(struct cmdq_pkt *pkt,
 	pkt->err_cb.data = (void *)data;
 }
 EXPORT_SYMBOL(cmdq_pkt_set_err_cb);
-

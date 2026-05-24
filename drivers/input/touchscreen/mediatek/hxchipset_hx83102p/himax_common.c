@@ -333,7 +333,7 @@ static int himax_self_test_seq_read(struct seq_file *s, void *v)
 	size_t ret = 0;
 
 	if (chip_test_r_flag) {
-#if defined(CONFIG_TOUCHSCREEN_HIMAX_INSPECT)
+#if defined(CONFIG_TOUCHSCREEN_HIMAX_HX83102P_INSPECT)
 		if (g_rslt_data)
 			seq_printf(s, "%s", g_rslt_data);
 		else
@@ -739,7 +739,7 @@ int himax_common_proc_init(void)
 		E(" %s: himax_touch_proc_dir file create failed!\n", __func__);
 		return -ENOMEM;
 	}
-#if defined(CONFIG_TOUCHSCREEN_HIMAX_INSPECT)
+#if defined(CONFIG_TOUCHSCREEN_HIMAX_HX83102P_INSPECT)
 	if (fp_himax_self_test_init != NULL)
 		fp_himax_self_test_init();
 #endif
@@ -895,7 +895,7 @@ int himax_input_register(struct himax_ts_data *ts)
 #if defined(HX_SMART_WAKEUP)
 	for (i = 0; i < GEST_SUP_NUM; i++)
 		set_bit(gest_key_def[i], ts->input_dev->keybit);
-#elif defined(CONFIG_TOUCHSCREEN_HIMAX_INSPECT) || defined(HX_PALM_REPORT)
+#elif defined(CONFIG_TOUCHSCREEN_HIMAX_HX83102P_INSPECT) || defined(HX_PALM_REPORT)
 	set_bit(KEY_POWER, ts->input_dev->keybit);
 #endif
 	set_bit(BTN_TOUCH, ts->input_dev->keybit);
@@ -3117,7 +3117,7 @@ found_hx_chip:
 
 	himax_ts_register_interrupt();
 
-#if defined(CONFIG_TOUCHSCREEN_HIMAX_DEBUG)
+#if defined(CONFIG_TOUCHSCREEN_HIMAX_HX83102P_DEBUG)
 	if (himax_debug_init())
 		E(" %s: debug initial failed!\n", __func__);
 #endif
@@ -3182,11 +3182,11 @@ void himax_chip_common_deinit(void)
 
 	himax_ts_unregister_interrupt();
 
-#if defined(CONFIG_TOUCHSCREEN_HIMAX_INSPECT)
+#if defined(CONFIG_TOUCHSCREEN_HIMAX_HX83102P_INSPECT)
 	himax_inspect_data_clear();
 #endif
 
-#if defined(CONFIG_TOUCHSCREEN_HIMAX_DEBUG)
+#if defined(CONFIG_TOUCHSCREEN_HIMAX_HX83102P_DEBUG)
 	himax_debug_remove();
 #endif
 

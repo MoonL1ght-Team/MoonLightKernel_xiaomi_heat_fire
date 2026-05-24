@@ -2410,7 +2410,6 @@ uint32_t wlanDownloadPatch(IN struct ADAPTER *prAdapter)
 	}
 
 #if (CFG_ROM_PATCH_NO_SEM_CTRL == 0)
-#pragma message("ROM code supports SEM-CTRL for ROM patch download")
 	if (wlanPatchIsDownloaded(prAdapter)) {
 		kalFirmwareImageUnmapping(prAdapter->prGlueInfo, NULL,
 					  prFwBuffer);

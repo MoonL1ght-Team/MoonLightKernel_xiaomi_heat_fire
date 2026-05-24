@@ -1909,9 +1909,9 @@ static struct platform_driver gf_platform_driver = {
 static int gf_probe(struct platform_device  *pdev)
 {
 	struct gf_device *gf_dev = &goodix_dev;
-	gf_dev->device = &pdev->dev;
 	int status = -EINVAL;
 
+	gf_dev->device = &pdev->dev;
 	FUNC_ENTRY();
         gf_debug(ERR_LOG, "entry:%s\n", __func__);
 	INIT_WORK(&fp_display_work, unblank_work);
@@ -2204,7 +2204,6 @@ err_buf:
 	mutex_destroy(&gf_dev->release_lock);
 
 	gf_dev = NULL;
-err:
 	gf_debug(ERR_LOG, "[gf][goodix_test] %s, probe fail\n" , __func__);
 	FUNC_EXIT();
 	return status;
@@ -2277,11 +2276,11 @@ static int gf_remove(struct platform_device *pdev)
 static int check_hwid(struct spi_device *spi)
 {
 	struct gf_device *gf_dev = &goodix_dev;
-	gf_dev->spi = spi;
 	int status = -EINVAL;
 	unsigned char rx_test[10] = {0};
 	unsigned int retry = 0;
 
+	gf_dev->spi = spi;
 	spin_lock_init(&gf_dev->spi_lock);
 	mutex_init(&gf_dev->buf_lock);
 	mutex_init(&gf_dev->release_lock);
