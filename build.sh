@@ -62,6 +62,20 @@ fetch_clang() {
 	trap - RETURN
 }
 
+build_dtbo_image() {
+	local boot_dir dtbo_image
+	local -a overlays
+
+	boot_dir="$OUT_DIR/arch/arm64/boot"
+	mapfile -t overlays < <(find "$boot_dir/dts" -type f -name '*.dtbo' -print 2>/dev/null | sort)
+	((${#overlays[@]})) || return
+
+	require_command mkdtboimg
+	dtbo_image="$boot_dir/dtbo.img"
+	mkdtboimg create "$dtbo_image" --page_size=2048 "${overlays[@]}"
+	printf 'DTBO image: %s\n' "$dtbo_image"
+}
+
 prepare_anykernel() {
 	local package_dir image zip_name version
 
@@ -162,5 +176,6 @@ printf 'Building %s with %s (%s jobs, ccache enabled)...\n' \
 make "${MAKE_ARGS[@]}" "$DEFCONFIG"
 make "${MAKE_ARGS[@]}" olddefconfig
 make -j"$JOBS" "${MAKE_ARGS[@]}"
+build_dtbo_image
 prepare_anykernel
 ccache --show-stats

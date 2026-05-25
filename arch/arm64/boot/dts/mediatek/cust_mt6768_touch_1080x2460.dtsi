@@ -84,9 +84,11 @@
 
 
 &spi2 {
+	#address-cells = <1>;
+	#size-cells = <0>;
 	status = "ok";
 	/* Novatek device tree node */
-	novatek@1 {
+	novatek@0 {
 		compatible = "novatek,NVT-ts-spi","focaltech,fts";
 		reg = <0>; //Same as CS ID
 		status = "ok";
@@ -932,4 +934,3 @@
 		};
 	};
 };
-

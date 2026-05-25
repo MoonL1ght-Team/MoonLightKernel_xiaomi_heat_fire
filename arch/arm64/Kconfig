@@ -1458,6 +1458,20 @@ config BUILD_ARM64_APPENDED_DTB_IMAGE_NAMES
           Space separated list of names of dtbs to append when
           building a concatenated Image.gz-dtb.
 
+config BUILD_ARM64_DTB_OVERLAY_IMAGE
+        bool "Build device tree overlay blobs by default"
+        depends on OF
+        help
+          Enabling this option causes the selected device tree overlays to
+          be compiled as .dtbo files when building dtbs.
+
+config BUILD_ARM64_DTB_OVERLAY_IMAGE_NAMES
+        string "Default dtbo names"
+        depends on BUILD_ARM64_DTB_OVERLAY_IMAGE
+        help
+          Space separated list of device tree overlays to compile as .dtbo
+          files when building dtbs.
+
 endmenu
 
 config COMPAT

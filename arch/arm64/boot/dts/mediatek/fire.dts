@@ -84,6 +84,8 @@
 };
 
 &i2c2 {
+	#address-cells = <1>;
+	#size-cells = <0>;
 	clock-frequency = <400000>;
 
 	mtk-usb@60 {
@@ -94,7 +96,9 @@
 };
 
 &i2c3 {
-        clock-frequency = <400000>;
+	#address-cells = <1>;
+	#size-cells = <0>;
+	        clock-frequency = <400000>;
 	pn557: pn557@28 {
 		compatible = "nxp,pn557";
 		reg = <0x28>;
@@ -122,6 +126,8 @@
 };
 */
 &i2c5 {
+	#address-cells = <1>;
+	#size-cells = <0>;
 	clock-frequency = <400000>;
 	wusb3801x_typec: usb_type_c_wusb3801@60 {
 		compatible = "mediatek,usb_type_c_wusb3801";
@@ -236,6 +242,8 @@
 	};
 };
 &i2c6 {
+	#address-cells = <1>;
+	#size-cells = <0>;
 	clock-frequency = <400000>;
 	syv690_chg:syv690@6a {
 		compatible = "silergy,syv690";
@@ -427,6 +435,8 @@
 /* DISPSYS GPIO standardization end*/
 
 &i2c6 {
+	#address-cells = <1>;
+	#size-cells = <0>;
 	lm3697@36 {
 		compatible = "ti,lm3697";
 		reg = <0x36>;
@@ -539,6 +549,8 @@
 	};
 };
 &spi0 {
+	#address-cells = <1>;
+	#size-cells = <0>;
 	fpc_spi@0 {
 		compatible = "fpc,fpc_spi";
 		reg = <0>;

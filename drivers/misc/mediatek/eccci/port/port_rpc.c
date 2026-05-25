@@ -199,10 +199,10 @@ static int get_dram_type_clk(int *clk, int *type)
 
 static struct eint_struct md_eint_struct[] = {
 	/* ID of MD get, property name,  cell index read from property */
-	{SIM_EINT_NUM, "interrupts", 0,},
+	{SIM_EINT_NUM, "mediatek,md-eint", 0,},
 	{SIM_EINT_DEBOUNCE, "debounce", 1,},
-	{SIM_EINT_POLA, "interrupts", 1,},
-	{SIM_EINT_SENS, "interrupts", 1,},
+	{SIM_EINT_POLA, "mediatek,md-eint", 1,},
+	{SIM_EINT_SENS, "mediatek,md-eint", 1,},
 	{SIM_EINT_SOCKE, "sockettype", 1,},
 	{SIM_EINT_DEDICATEDEN, "dedicated", 1,},
 	{SIM_EINT_SRCPIN, "src_pin", 1,},
@@ -249,6 +249,10 @@ static int get_eint_attr_val(int md_id, struct device_node *node, int index)
 		ret = of_property_read_u32_index(node,
 			md_eint_struct[type].property,
 			md_eint_struct[type].index, &value);
+		if (ret != 0 &&
+		    !strcmp(md_eint_struct[type].property, "mediatek,md-eint"))
+			ret = of_property_read_u32_index(node, "interrupts",
+				md_eint_struct[type].index, &value);
 		if (ret != 0) {
 			md_eint_struct[type].value_sim[index] =
 			ERR_SIM_HOT_PLUG_QUERY_TYPE;
@@ -1428,4 +1432,3 @@ struct port_ops rpc_port_ops = {
 	.recv_match = &port_rpc_recv_match,
 	.recv_skb = &port_recv_skb,
 };
-
