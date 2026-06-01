@@ -479,7 +479,7 @@ static void lcm_resume_power(void)
 }
 
 extern int fts_resume(void);
-extern int fts_fwresume_work(void);
+extern void fts_fwresume_work(void);
 static void lcm_init(void)
 {
 	MDELAY(2);
@@ -694,4 +694,3 @@ struct LCM_DRIVER dsi_panel_m19a_42_03_0b_dsc_vdo_lcm_drv = {
 	.esd_recover = lcd_esd_recover,
 
 };
-
