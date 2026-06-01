@@ -38,6 +38,7 @@ DEFCONFIG="${DEFCONFIG:-${DEVICE}_defconfig}"
 OUT_DIR="${OUT_DIR:-$ROOT_DIR/out/$DEVICE}"
 DIST_DIR="${DIST_DIR:-$ROOT_DIR/dist}"
 PREBUILT_KERNEL_OUT="${PREBUILT_KERNEL_OUT:-$DIST_DIR/kernel}"
+PREBUILT_DTB_OUT="${PREBUILT_DTB_OUT:-$DIST_DIR/mtk_dtb}"
 PREBUILT_DTBO_OUT="${PREBUILT_DTBO_OUT:-$DIST_DIR/dtbo.img}"
 JOBS="${JOBS:-$(nproc --all)}"
 
@@ -93,15 +94,23 @@ build_dtbo_image() {
 }
 
 prepare_prebuilt() {
-	local dtbo_image image
+	local dtb_image dtbo_image image
 
 	image="$OUT_DIR/arch/arm64/boot/Image.gz"
 	[[ -f "$image" ]] || die "kernel image was not produced"
+	dtb_image="$OUT_DIR/arch/arm64/boot/dts/mediatek/mt6768.dtb"
 	dtbo_image="$OUT_DIR/arch/arm64/boot/dtbo.img"
 
 	mkdir -p "$(dirname "$PREBUILT_KERNEL_OUT")"
 	cp "$image" "$PREBUILT_KERNEL_OUT"
 	printf 'Prebuilt kernel: %s\n' "$PREBUILT_KERNEL_OUT"
+
+	rm -f "$PREBUILT_DTB_OUT"
+	if [[ -f "$dtb_image" ]]; then
+		mkdir -p "$(dirname "$PREBUILT_DTB_OUT")"
+		cp "$dtb_image" "$PREBUILT_DTB_OUT"
+		printf 'Prebuilt DTB image: %s\n' "$PREBUILT_DTB_OUT"
+	fi
 
 	rm -f "$PREBUILT_DTBO_OUT"
 	if [[ -f "$dtbo_image" ]]; then

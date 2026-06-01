@@ -29,7 +29,8 @@ partition auto-slot detection and ramdisk preservation.
 
 The ``--prebuilt`` mode skips AnyKernel3 packaging and writes the ``Image.gz``
 kernel artifact to ``dist/kernel`` for use as ``TARGET_PREBUILT_KERNEL`` during
-firmware builds.  If DTBO overlays are enabled, it also writes ``dist/dtbo.img``.
+firmware builds.  It also exports the MediaTek platform DTB as ``dist/mtk_dtb``.
+If DTBO overlays are enabled, it writes ``dist/dtbo.img`` as well.
 
 Useful overrides
 ----------------
@@ -40,6 +41,7 @@ Useful overrides
     TOOLCHAIN_DIR=/path/to/clang-r383902b ./build.sh fire
     CCACHE_DIR=/path/to/ccache CCACHE_MAXSIZE=20G ./build.sh heat
     PREBUILT_KERNEL_OUT=/path/to/kernel ./build.sh fire --prebuilt
+    PREBUILT_DTB_OUT=/path/to/mtk_dtb ./build.sh fire --prebuilt
     PREBUILT_DTBO_OUT=/path/to/dtbo.img ./build.sh fire --prebuilt
     ./build.sh fire clean
 
