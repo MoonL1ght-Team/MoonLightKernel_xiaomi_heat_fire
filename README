@@ -19,12 +19,17 @@ keeps compiler objects in the ccache directory for faster rebuilds.
 
     ./build.sh fire
     ./build.sh heat
+    ./build.sh fire --prebuilt
 
 The default target is ``fire``.  Output kernel objects are written below
 ``out/<device>/`` and the flashable archive is written to ``dist/``.
 AnyKernel3 is fetched from the upstream ``osm0sis/AnyKernel3`` repository at a
 pinned revision and configured for the ``fire``/``heat`` device names, boot
 partition auto-slot detection and ramdisk preservation.
+
+The ``--prebuilt`` mode skips AnyKernel3 packaging and writes the ``Image.gz``
+kernel artifact to ``dist/kernel`` for use as ``TARGET_PREBUILT_KERNEL`` during
+firmware builds.  If DTBO overlays are enabled, it also writes ``dist/dtbo.img``.
 
 Useful overrides
 ----------------
@@ -34,6 +39,8 @@ Useful overrides
     JOBS=8 ./build.sh fire
     TOOLCHAIN_DIR=/path/to/clang-r383902b ./build.sh fire
     CCACHE_DIR=/path/to/ccache CCACHE_MAXSIZE=20G ./build.sh heat
+    PREBUILT_KERNEL_OUT=/path/to/kernel ./build.sh fire --prebuilt
+    PREBUILT_DTBO_OUT=/path/to/dtbo.img ./build.sh fire --prebuilt
     ./build.sh fire clean
 
 Kernel configuration

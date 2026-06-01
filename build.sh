@@ -3,27 +3,42 @@ set -euo pipefail
 
 ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 DEVICE="${DEVICE:-fire}"
-if [[ "${1:-}" == "fire" || "${1:-}" == "heat" ]]; then
-	DEVICE="$1"
-	shift
-fi
+PREBUILT=0
+CLEAN=0
 
-case "${1:-}" in
-	clean)
-		rm -rf "${OUT_DIR:-$ROOT_DIR/out/$DEVICE}" "${DIST_DIR:-$ROOT_DIR/dist}"
-		exit 0
-		;;
-	"")
-		;;
-	*)
-		printf 'Usage: %s [fire|heat] [clean]\n' "$0" >&2
-		exit 2
-		;;
-esac
+usage() {
+	printf 'Usage: %s [fire|heat] [--prebuilt] [clean]\n' "$0" >&2
+}
+
+while (($#)); do
+	case "$1" in
+		fire|heat)
+			DEVICE="$1"
+			;;
+		--prebuilt)
+			PREBUILT=1
+			;;
+		clean)
+			CLEAN=1
+			;;
+		*)
+			usage
+			exit 2
+			;;
+	esac
+	shift
+done
+
+if ((CLEAN)); then
+	rm -rf "${OUT_DIR:-$ROOT_DIR/out/$DEVICE}" "${DIST_DIR:-$ROOT_DIR/dist}"
+	exit 0
+fi
 
 DEFCONFIG="${DEFCONFIG:-${DEVICE}_defconfig}"
 OUT_DIR="${OUT_DIR:-$ROOT_DIR/out/$DEVICE}"
 DIST_DIR="${DIST_DIR:-$ROOT_DIR/dist}"
+PREBUILT_KERNEL_OUT="${PREBUILT_KERNEL_OUT:-$DIST_DIR/kernel}"
+PREBUILT_DTBO_OUT="${PREBUILT_DTBO_OUT:-$DIST_DIR/dtbo.img}"
 JOBS="${JOBS:-$(nproc --all)}"
 
 CLANG_REVISION="${CLANG_REVISION:-clang-r383902b}"
@@ -75,6 +90,25 @@ build_dtbo_image() {
 	require_command mkdtboimg
 	mkdtboimg create "$dtbo_image" --page_size=2048 "${overlays[@]}"
 	printf 'DTBO image: %s\n' "$dtbo_image"
+}
+
+prepare_prebuilt() {
+	local dtbo_image image
+
+	image="$OUT_DIR/arch/arm64/boot/Image.gz"
+	[[ -f "$image" ]] || die "kernel image was not produced"
+	dtbo_image="$OUT_DIR/arch/arm64/boot/dtbo.img"
+
+	mkdir -p "$(dirname "$PREBUILT_KERNEL_OUT")"
+	cp "$image" "$PREBUILT_KERNEL_OUT"
+	printf 'Prebuilt kernel: %s\n' "$PREBUILT_KERNEL_OUT"
+
+	rm -f "$PREBUILT_DTBO_OUT"
+	if [[ -f "$dtbo_image" ]]; then
+		mkdir -p "$(dirname "$PREBUILT_DTBO_OUT")"
+		cp "$dtbo_image" "$PREBUILT_DTBO_OUT"
+		printf 'Prebuilt DTBO image: %s\n' "$PREBUILT_DTBO_OUT"
+	fi
 }
 
 prepare_anykernel() {
@@ -143,8 +177,10 @@ EOF
 
 require_command make
 require_command ccache
-require_command git
-require_command zip
+if ((!PREBUILT)); then
+	require_command git
+	require_command zip
+fi
 fetch_clang
 
 export PATH="$TOOLCHAIN_DIR/bin:$PATH"
@@ -178,5 +214,9 @@ make "${MAKE_ARGS[@]}" "$DEFCONFIG"
 make "${MAKE_ARGS[@]}" olddefconfig
 make -j"$JOBS" "${MAKE_ARGS[@]}"
 build_dtbo_image
-prepare_anykernel
+if ((PREBUILT)); then
+	prepare_prebuilt
+else
+	prepare_anykernel
+fi
 ccache --show-stats
