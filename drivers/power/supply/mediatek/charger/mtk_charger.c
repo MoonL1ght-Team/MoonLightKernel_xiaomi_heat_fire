@@ -694,7 +694,7 @@ void charger_manager_set_prop_system_temp_level(int temp_level)
 			pinfo->system_temp_level = pinfo->system_temp_level_max - 1;
 	else
 			pinfo->system_temp_level = temp_level;
-	pr_err("%s,thermal_current = %d,level = %d\n", __func__, thermal_mitigation[pinfo->system_temp_level], temp_level);
+	pr_debug("%s,thermal_current = %d,level = %d\n", __func__, thermal_mitigation[pinfo->system_temp_level], temp_level);
 	pinfo->thermal_mitigation_current = thermal_mitigation[pinfo->system_temp_level];
 }
 

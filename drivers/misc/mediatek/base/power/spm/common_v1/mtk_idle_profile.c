@@ -128,9 +128,6 @@ void mtk_idle_dump_cnt_in_interval(void)
 
 	mtk_idle_module_info_dump(MTK_IDLE_MODULE_INFO_COUNT
 				,  get_log(), IDLE_LOG_BUF_LEN);
-	/* dump log */
-	printk_deferred("[name:spm&]Power/swap %s\n", get_log());
-
 	/* dump idle ratio */
 	if (idle_ratio_en) {
 		idle_ratio_profile_duration =
@@ -275,4 +272,3 @@ void mtk_idle_latency_profile_result(struct MTK_IDLE_MODEL_CLERK *clerk)
 
 	printk_deferred("[name:spm&]Power/latency_profile %s\n", plog);
 }
-
