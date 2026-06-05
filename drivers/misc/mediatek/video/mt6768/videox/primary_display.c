@@ -497,11 +497,13 @@ enum mtkfb_power_mode primary_display_get_power_mode(void)
 
 bool primary_is_aod_supported(void)
 {
-	if (disp_helper_get_option(DISP_OPT_AOD) &&
-		!disp_lcm_is_video_mode(pgc->plcm))
-		return 1;
+	if (!disp_helper_get_option(DISP_OPT_AOD))
+		return 0;
 
-	return 0;
+	if (!pgc || !pgc->plcm || !pgc->plcm->drv || !pgc->plcm->drv->aod)
+		return 0;
+
+	return 1;
 }
 
 /* LCM power state API */

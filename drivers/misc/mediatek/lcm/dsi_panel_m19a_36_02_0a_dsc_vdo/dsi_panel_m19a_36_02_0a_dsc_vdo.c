@@ -142,6 +142,12 @@ static struct LCM_setting_table lcm_suspend_proximity_setting[] = {
 	{0x28, 0, {} }
 };
 
+static struct LCM_setting_table lcm_aod_exit_setting[] = {
+	{0x29, 1, {0x00} },
+	{REGFLAG_DELAY, 20, {} },
+	{REGFLAG_END_OF_TABLE, 0x00, {} }
+};
+
 static struct LCM_setting_table init_setting_vdo[] = {
 	{0XFF, 1, {0X20}},
 	{0XFB, 1, {0X01}},
@@ -703,6 +709,15 @@ static void lcm_setbacklight_vmcmd_cmdq(void *handle, unsigned int *lcm_cmd, uns
 	push_table_vmcmd(handle, bl_level, ARRAY_SIZE(bl_level), 1);
 }
 
+static void lcm_aod(int enter)
+{
+	LCM_LOGI("%s,nt36672c enter = %d\n", __func__, enter);
+
+	if (!enter)
+		push_table(NULL, lcm_aod_exit_setting,
+			ARRAY_SIZE(lcm_aod_exit_setting), 1);
+}
+
 static int cabc_status = 0;
 static void lcm_set_cabc_vmcmd_cmdq(void *handle, unsigned int *lcm_cmd, unsigned int *lcm_count, unsigned int level)
 {
@@ -808,6 +823,6 @@ struct LCM_DRIVER dsi_panel_m19a_36_02_0a_dsc_vdo_lcm_drv = {
 	.get_cabc_status = lcm_get_cabc_status,
 	.ata_check = lcm_ata_check,
 	.update = lcm_update,
+	.aod = lcm_aod,
 	.esd_recover = lcd_esd_recover,
 };
-

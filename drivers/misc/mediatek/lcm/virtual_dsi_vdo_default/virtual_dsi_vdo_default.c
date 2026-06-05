@@ -199,6 +199,10 @@ static void lcm_setbacklight_cmdq(void *handle, unsigned int level)
 {
 }
 
+static void lcm_aod(int enter)
+{
+}
+
 static void lcm_init(void)
 {
 }
@@ -222,4 +226,5 @@ struct LCM_DRIVER virtual_dsi_vdo_default_drv = {
 	.resume = lcm_resume,
 	.set_backlight = lcm_setbacklight,
 	.set_backlight_cmdq = lcm_setbacklight_cmdq,
+	.aod = lcm_aod,
 };
