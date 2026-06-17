@@ -152,6 +152,12 @@ static struct LCM_setting_table lcm_aod_exit_setting[] = {
     {REGFLAG_END_OF_TABLE, 0x00, {}}
 };
 
+static struct LCM_setting_table lcm_aod_enter_setting[] = {
+    {0x51, 2, {0x08, 0x00}},
+    {REGFLAG_DELAY, 20, {}},
+    {REGFLAG_END_OF_TABLE, 0x00, {}}
+};
+
 static struct LCM_setting_table init_setting_vdo[] = {
     {0x00, 1, {0x00}},
     {0xFF, 3, {0x87, 0x20, 0x01}},
@@ -596,7 +602,10 @@ static void lcm_aod(int enter)
 {
     LCM_LOGD("%s,ft8720 enter = %d\n", __func__, enter);
 
-    if (!enter)
+    if (enter)
+        push_table(NULL, lcm_aod_enter_setting,
+                   ARRAY_SIZE(lcm_aod_enter_setting), 1);
+    else
         push_table(NULL, lcm_aod_exit_setting,
                    ARRAY_SIZE(lcm_aod_exit_setting), 1);
 }

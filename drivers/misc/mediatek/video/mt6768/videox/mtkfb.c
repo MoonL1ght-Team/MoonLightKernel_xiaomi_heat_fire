@@ -78,6 +78,8 @@ static u32 MTK_FB_BPP;
 static u32 MTK_FB_PAGES;
 static u32 fb_xres_update;
 static u32 fb_yres_update;
+
+static int mtkfb_aod_mode_switch(enum mtkfb_aod_power_mode aod_pm);
 static size_t mtkfb_log_on = true;
 
 static int sem_flipping_cnt = 1;
@@ -425,10 +427,16 @@ static int mtkfb_blank(int blank_mode, struct fb_info *info)
 			break;
 		}
 
-		primary_display_set_power_mode(FB_SUSPEND);
-		mtkfb_early_suspend();
+		if (primary_is_aod_supported()) {
+			DISPCHECK("AOD: route FB_BLANK_POWERDOWN to DOZE_SUSPEND\n");
+			mtkfb_aod_mode_switch(MTKFB_AOD_DOZE_SUSPEND);
+		} else {
+			primary_display_set_power_mode(FB_SUSPEND);
+			mtkfb_early_suspend();
+		}
 
-		debug_print_power_mode_check(prev_pm, FB_SUSPEND);
+		debug_print_power_mode_check(prev_pm,
+			primary_display_get_power_mode());
 
 		break;
 	default:
@@ -1146,7 +1154,7 @@ unsigned int mtkfb_fm_auto_test(void)
 	return result;
 }
 
-int mtkfb_aod_mode_switch(enum mtkfb_aod_power_mode aod_pm)
+static int mtkfb_aod_mode_switch(enum mtkfb_aod_power_mode aod_pm)
 {
 	int ret = 0;
 	enum mtkfb_power_mode prev_pm = primary_display_get_power_mode();
