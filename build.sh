@@ -700,7 +700,7 @@ package_prebuilt() {
 }
 
 prepare_anykernel() {
-	local package_dir image zip_name version
+	local package_dir image update_binary zip_name version
 
 	image="$OUT_DIR/arch/$ARCH/boot/Image.gz-dtb"
 	[[ -f "$image" ]] || image="$OUT_DIR/arch/$ARCH/boot/Image.gz"
@@ -719,6 +719,10 @@ prepare_anykernel() {
 	rm -rf "$package_dir"
 	mkdir -p "$package_dir"
 	git -C "$ANYKERNEL_CACHE" archive "$ANYKERNEL_COMMIT" | tar -x -C "$package_dir"
+	update_binary="$package_dir/META-INF/com/google/android/update-binary"
+	if [[ -f "$update_binary" ]]; then
+		perl -0pi -e 's/(restore_env\(\) \{\n(?:.*\n)*?  sleep 1;\n)  umount_all;/$1  [ "\$(file_getprop anykernel.sh do.unmount 2>\/dev\/null)" == 1 ] \&\& umount_all;/s' "$update_binary"
+	fi
 	rm -rf "$package_dir/.github" "$package_dir/README.md"
 	cp "$image" "$package_dir/$(basename "$image")"
 	[[ -f "$ROOT_DIR/AUTHORS" ]] && cp "$ROOT_DIR/AUTHORS" "$package_dir/AUTHORS"
@@ -736,6 +740,7 @@ do.modules=0
 do.systemless=1
 do.cleanup=0
 do.cleanuponabort=0
+do.unmount=0
 device.name1=${DEVICE}
 supported.versions=
 supported.patchlevels=
