@@ -80,6 +80,7 @@ static u32 fb_xres_update;
 static u32 fb_yres_update;
 
 static int mtkfb_aod_mode_switch(enum mtkfb_aod_power_mode aod_pm);
+#define FIRE_AOD_BACKLIGHT_LEVEL 64
 static size_t mtkfb_log_on = true;
 
 static int sem_flipping_cnt = 1;
@@ -428,8 +429,9 @@ static int mtkfb_blank(int blank_mode, struct fb_info *info)
 		}
 
 		if (primary_is_aod_supported()) {
-			DISPCHECK("AOD: route FB_BLANK_POWERDOWN to DOZE\n");
-			mtkfb_aod_mode_switch(MTKFB_AOD_DOZE);
+			DISPCHECK("AOD: route FB_BLANK_POWERDOWN to DOZE_SUSPEND\n");
+			mtkfb_aod_mode_switch(MTKFB_AOD_DOZE_SUSPEND);
+			primary_display_aod_backlight(FIRE_AOD_BACKLIGHT_LEVEL);
 		} else {
 			primary_display_set_power_mode(FB_SUSPEND);
 			mtkfb_early_suspend();
