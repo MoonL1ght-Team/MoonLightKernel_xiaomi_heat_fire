@@ -147,6 +147,9 @@ static struct LCM_setting_table lcm_suspend_dstb_setting[] = {
 };
 
 static struct LCM_setting_table lcm_aod_exit_setting[] = {
+	{0x51, 2, {0xFF, 0x0E}},
+	{0x53, 1, {0x2C}},
+	{0x55, 1, {0x00}},
 	{0x29, 1, {0x00}},
 	{REGFLAG_DELAY, 20, {}},
 	{REGFLAG_END_OF_TABLE, 0x00, {}}
