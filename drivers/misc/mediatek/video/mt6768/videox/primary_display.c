@@ -115,6 +115,10 @@ static unsigned int primary_session_id =
 static struct disp_frm_seq_info frm_update_sequence[FRM_UPDATE_SEQ_CACHE_NUM];
 static unsigned int frm_update_cnt;
 static unsigned int gPresentFenceIndex;
+static unsigned int primary_display_last_normal_backlight;
+static bool primary_display_restore_backlight_on_resume;
+static int primary_display_setbacklight_internal(unsigned int level,
+	bool save_level, bool force);
 /* 0: normal, 1: lcd only, 2: none of lcd and lcm */
 unsigned int gTriggerDispMode;
 static unsigned int g_keep;
@@ -5021,6 +5025,7 @@ int primary_display_lcm_power_on_state(int alive)
 				disp_lcm_resume(pgc->plcm);
 			} else {
 				disp_lcm_aod(pgc->plcm, 0);
+				primary_display_restore_backlight_on_resume = true;
 				skip_update = 1;
 			}
 			DISPMSG("[POWER]lcm resume[end]\n");
@@ -5415,6 +5420,13 @@ int primary_display_resume(void)
 #endif
 done:
 	primary_set_state(DISP_ALIVE);
+	if (primary_display_restore_backlight_on_resume) {
+		primary_display_restore_backlight_on_resume = false;
+		if (primary_display_last_normal_backlight)
+			primary_display_setbacklight_internal(
+				primary_display_last_normal_backlight, false,
+				true);
+	}
 #if 0 //def CONFIG_TRUSTONIC_TRUSTED_UI
 	switch_set_state(&disp_switch_data, DISP_ALIVE);
 #endif
@@ -5556,7 +5568,7 @@ int primary_display_aod_backlight(int level)
 
 skip_resume:
 
-	primary_display_setbacklight_nolock(level);
+	primary_display_setbacklight_internal(level, false, false);
 
 	/* blocking flush before stop trigger loop */
 	_blocking_flush();
@@ -8407,7 +8419,8 @@ int primary_display_hbm_wait(bool en)
 	return 0;
 }
 
-int primary_display_setbacklight_nolock(unsigned int level)
+static int primary_display_setbacklight_internal(unsigned int level,
+	bool save_level, bool force)
 {
 	static unsigned int last_level;
 
@@ -8418,7 +8431,7 @@ int primary_display_setbacklight_nolock(unsigned int level)
 		return 0;
 	}
 
-	if (last_level == level)
+	if (!force && last_level == level)
 		return 0;
 
 	mmprofile_log_ex(ddp_mmp_get_events()->primary_set_bl,
@@ -8445,11 +8458,18 @@ int primary_display_setbacklight_nolock(unsigned int level)
 			_set_backlight_by_cpu(level);
 		}
 		last_level = level;
+		if (save_level)
+			primary_display_last_normal_backlight = level;
 	}
 
 	mmprofile_log_ex(ddp_mmp_get_events()->primary_set_bl,
 			 MMPROFILE_FLAG_END, 0, 0);
 	return 0;
+}
+
+int primary_display_setbacklight_nolock(unsigned int level)
+{
+	return primary_display_setbacklight_internal(level, true, false);
 }
 
 int primary_display_set_cabc(unsigned int level)
