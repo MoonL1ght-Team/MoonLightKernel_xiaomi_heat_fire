@@ -115,6 +115,12 @@ static unsigned int primary_session_id =
 static struct disp_frm_seq_info frm_update_sequence[FRM_UPDATE_SEQ_CACHE_NUM];
 static unsigned int frm_update_cnt;
 static unsigned int gPresentFenceIndex;
+static unsigned int primary_display_last_normal_backlight;
+static unsigned int primary_display_last_sent_backlight;
+static bool primary_display_aod_backlight_active;
+static bool primary_display_restore_backlight_on_resume;
+static int primary_display_setbacklight_internal(unsigned int level,
+	bool save_level, bool force, bool track_sent_level);
 /* 0: normal, 1: lcd only, 2: none of lcd and lcm */
 unsigned int gTriggerDispMode;
 static unsigned int g_keep;
@@ -5021,6 +5027,7 @@ int primary_display_lcm_power_on_state(int alive)
 				disp_lcm_resume(pgc->plcm);
 			} else {
 				disp_lcm_aod(pgc->plcm, 0);
+				primary_display_restore_backlight_on_resume = true;
 				skip_update = 1;
 			}
 			DISPMSG("[POWER]lcm resume[end]\n");
@@ -5036,6 +5043,7 @@ int primary_display_resume(void)
 	enum DISP_STATUS ret = DISP_STATUS_OK;
 	struct ddp_io_golden_setting_arg gset_arg;
 	int i, skip_update = 0;
+	unsigned int restore_backlight;
 	struct disp_ddp_path_config *data_config;
 #ifdef MTK_FB_MMDVFS_SUPPORT
 	unsigned long long bandwidth;
@@ -5415,6 +5423,15 @@ int primary_display_resume(void)
 #endif
 done:
 	primary_set_state(DISP_ALIVE);
+	if (primary_display_restore_backlight_on_resume) {
+		primary_display_restore_backlight_on_resume = false;
+		restore_backlight = primary_display_last_normal_backlight;
+		if (!restore_backlight)
+			restore_backlight = get_last_backlight_level();
+		if (restore_backlight)
+			primary_display_setbacklight_internal(
+				restore_backlight, true, true, true);
+	}
 #if 0 //def CONFIG_TRUSTONIC_TRUSTED_UI
 	switch_set_state(&disp_switch_data, DISP_ALIVE);
 #endif
@@ -5448,6 +5465,7 @@ done:
 int primary_display_aod_backlight(int level)
 {
 	int ret;
+	unsigned int restore_backlight;
 
 	_primary_path_lock(__func__);
 
@@ -5556,7 +5574,12 @@ int primary_display_aod_backlight(int level)
 
 skip_resume:
 
-	primary_display_setbacklight_nolock(level);
+	restore_backlight = get_last_backlight_level();
+	if (restore_backlight)
+		primary_display_last_normal_backlight = restore_backlight;
+
+	primary_display_setbacklight_internal(level, false, true, false);
+	primary_display_restore_backlight_on_resume = true;
 
 	/* blocking flush before stop trigger loop */
 	_blocking_flush();
@@ -8407,18 +8430,22 @@ int primary_display_hbm_wait(bool en)
 	return 0;
 }
 
-int primary_display_setbacklight_nolock(unsigned int level)
+static int primary_display_setbacklight_internal(unsigned int level,
+	bool save_level, bool force, bool track_sent_level)
 {
-	static unsigned int last_level;
-
 	DISPFUNC();
+	if (save_level && level)
+		primary_display_last_normal_backlight = level;
+
 	if (disp_helper_get_stage() != DISP_HELPER_STAGE_NORMAL) {
 		DISPMSG("%s skip due to stage %s\n", __func__,
 			disp_helper_stage_spy());
 		return 0;
 	}
 
-	if (last_level == level)
+	if (!force && track_sent_level &&
+		!primary_display_aod_backlight_active &&
+		primary_display_last_sent_backlight == level)
 		return 0;
 
 	mmprofile_log_ex(ddp_mmp_get_events()->primary_set_bl,
@@ -8444,12 +8471,22 @@ int primary_display_setbacklight_nolock(unsigned int level)
 		} else {
 			_set_backlight_by_cpu(level);
 		}
-		last_level = level;
+		if (track_sent_level) {
+			primary_display_last_sent_backlight = level;
+			primary_display_aod_backlight_active = false;
+		} else {
+			primary_display_aod_backlight_active = true;
+		}
 	}
 
 	mmprofile_log_ex(ddp_mmp_get_events()->primary_set_bl,
 			 MMPROFILE_FLAG_END, 0, 0);
 	return 0;
+}
+
+int primary_display_setbacklight_nolock(unsigned int level)
+{
+	return primary_display_setbacklight_internal(level, true, false, true);
 }
 
 int primary_display_set_cabc(unsigned int level)
